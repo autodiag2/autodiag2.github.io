@@ -6,6 +6,7 @@ import * as cheerio from "cheerio"
 import type { Connect } from "vite"
 
 export default defineConfig({
+  base: './',
   plugins: [
     react(),
     {
