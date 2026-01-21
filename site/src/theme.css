@@ -39,6 +39,16 @@ nav {
   background: var(--base2);
   gap: 1rem;
   padding: 1rem;
+  align-items: center;
+  justify-content: space-evenly;
+}
+.presentation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.spacer {
+  height: 1rem;
 }
 
 .solarized-dark nav {
