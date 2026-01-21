@@ -33,7 +33,26 @@ html, body {
   color: var(--base0);
   min-height: 100vh;
 }
-
+.post-button {
+  border-radius: 100px;
+  margin-top: 0.5rem;
+}
+.solarized-light .post-button {
+  background: var(--base3);
+  color: var(--base00);
+}
+.solarized-dark .post-button {
+  background: var(--base03);
+  color: var(--base0);
+}
+.solarized-light .post-button:hover {
+  background: var(--base03);
+  color: var(--base2);
+}
+.solarized-dark .post-button:hover {
+  background: var(--base3);
+  color: var(--base02);
+}
 nav {
   display: flex;
   background: var(--base2);

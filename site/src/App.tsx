@@ -2,22 +2,55 @@ import { useState, useEffect } from "react"
 import logo from "./assets/logo.png"
 import logo_github from "./assets/logo_github.png"
 
-type Post = { id: number; title: string; body: string }
+type Post = { id: number; title: string; bodyFile: string; body?: string }
 
 export default function App() {
   const [dark, setDark] = useState(false)
   const [posts, setPosts] = useState<Post[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loadingPosts, setLoadingPosts] = useState(false)
+  const [loadingBody, setLoadingBody] = useState(false)
+  const [selectedPostId, setSelectedPostId] = useState<number | null>(null)
 
   useEffect(() => {
-    setLoading(true)
-    fetch("https://jsonplaceholder.typicode.com/posts?_limit=5")
+    setLoadingPosts(true)
+    // Fetch posts index JSON listing available posts (id, title, filename)
+    fetch("/posts/index.json")
       .then(res => res.json())
-      .then((data: Post[]) => {
-        setPosts(data)
-        setLoading(false)
+      .then((data: { id: number; title: string; filename: string }[]) => {
+        const postsData = data.map(({ id, title, filename }) => ({
+          id,
+          title,
+          bodyFile: `/posts/${filename}`,
+        }))
+        setPosts(postsData)
+        setLoadingPosts(false)
+        if (postsData.length > 0) setSelectedPostId(postsData[0].id)
       })
+      .catch(() => setLoadingPosts(false))
   }, [])
+
+  useEffect(() => {
+    if (selectedPostId == null) return
+    const post = posts.find(p => p.id === selectedPostId)
+    if (!post) return
+
+    if (post.body) return // already loaded
+
+    setLoadingBody(true)
+    fetch(post.bodyFile)
+      .then(res => res.text())
+      .then(html => {
+        setPosts(prev =>
+          prev.map(p =>
+            p.id === post.id ? { ...p, body: html } : p
+          )
+        )
+        setLoadingBody(false)
+      })
+      .catch(() => setLoadingBody(false))
+  }, [selectedPostId, posts])
+
+  const selectedPost = posts.find(p => p.id === selectedPostId)
 
   return (
     <div
@@ -32,6 +65,7 @@ export default function App() {
           flexDirection: "column",
           gap: "1rem",
           flexShrink: 0,
+          overflowY: "auto",
         }}
       >
         <div className="presentation">
@@ -40,6 +74,27 @@ export default function App() {
           </a>
           <div className="spacer"></div>
           <span className="title">autodiag</span>
+        </div>
+        <div>
+          <h3>Posts</h3>
+          {loadingPosts && <p>Loading posts...</p>}
+          {!loadingPosts &&
+            posts.map(({ id, title }) => (
+              <button
+                key={id}
+                onClick={() => setSelectedPostId(id)}
+                className="post-button"
+                style={{
+                  border: "none",
+                  padding: "0.5rem",
+                  textAlign: "left",
+                  width: "100%",
+                  cursor: "pointer",
+                }}
+              >
+                - {title}
+              </button>
+            ))}
         </div>
         <div className="social-icons" style={{ display: "flex", gap: "1rem", width: "100%" }}>
           <a href="https://github.com/autodiag2/">
@@ -70,14 +125,14 @@ export default function App() {
           Autodiag democratizes access to car diagnostics and repair through
           open tools and documentation.
         </p>
-        {loading && <p>Loading posts...</p>}
-        {!loading &&
-          posts.map(({ id, title, body }) => (
-            <article key={id} style={{ marginBottom: "1.5rem" }}>
-              <h2>{title}</h2>
-              <p>{body}</p>
-            </article>
-          ))}
+        {loadingBody && <p>Loading post content...</p>}
+        {!loadingBody && selectedPost?.body && (
+          <article
+            style={{ marginTop: "1.5rem" }}
+            dangerouslySetInnerHTML={{ __html: selectedPost.body }}
+          />
+        )}
+        {!loadingBody && !selectedPost?.body && <p>Select a post from the menu</p>}
       </main>
     </div>
   )
