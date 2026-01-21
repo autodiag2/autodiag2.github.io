@@ -34,10 +34,17 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build  
+        run: npm run build
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git clone --branch=gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} deploy
+          rm -rf deploy/*
+          cp -r ./dist/* deploy/
+          cd deploy
+          git add .
+          git commit -m "Deploy from GitHub Actions"
+          git push origin gh-pages
+
