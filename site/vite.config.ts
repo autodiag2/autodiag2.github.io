@@ -13,7 +13,7 @@ export default defineConfig({
       configureServer(server) {
         server.middlewares.use(
           "/posts/index.json",
-          (req: Connect.IncomingMessage, res: any) => {
+          (_req: Connect.IncomingMessage, res: any) => {
             const postsDir = path.resolve(__dirname, "public/posts")
             try {
               const files = fs.readdirSync(postsDir).filter(f => f.endsWith(".html"))
