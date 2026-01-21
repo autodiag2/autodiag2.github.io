@@ -73,7 +73,7 @@ export default function App() {
             <img src={logo} alt="Logo" style={{ width: 200, height: 200 }} />
           </a>
           <div className="spacer"></div>
-          <span className="title">autodiag</span>
+          <span className="title">autodiag2</span>
         </div>
         <div>
           <h3>Posts</h3>
@@ -92,7 +92,7 @@ export default function App() {
                   cursor: "pointer",
                 }}
               >
-                - {title}
+                {title}
               </button>
             ))}
         </div>
