@@ -2,7 +2,14 @@ import { useState, useEffect } from "react"
 import logo from "./assets/logo.png"
 import logo_github from "./assets/logo_github.png"
 
-type Post = { id: number; title: string; bodyFile: string; body?: string }
+type Post = {
+  id: number
+  title: string
+  bodyFile: string
+  body?: string
+  createdAt?: string
+  modifiedAt?: string
+}
 
 export default function App() {
   const [dark, setDark] = useState(false)
@@ -13,7 +20,6 @@ export default function App() {
   const [homeContent, setHomeContent] = useState<string>("")
 
   useEffect(() => {
-    // Load home page content from public/index.html (or another file if preferred)
     fetch("/index.html")
       .then(res => res.text())
       .then(html => setHomeContent(html))
@@ -24,21 +30,36 @@ export default function App() {
     setLoadingPosts(true)
     fetch("/posts/index.json")
       .then(res => res.json())
-      .then((data: { id: number; title: string; filename: string }[]) => {
-        const postsData = data.map(({ id, title, filename }) => ({
-          id,
-          title,
-          bodyFile: `/posts/${filename}`,
-        }))
-        setPosts(postsData)
-        setLoadingPosts(false)
-      })
+      .then(
+        (data: {
+          id: number
+          title: string
+          filename: string
+          createdAt?: string
+          modifiedAt?: string
+        }[]) => {
+          // Sort by createdAt descending (newest first)
+          data.sort(
+            (a, b) =>
+              new Date(b.createdAt || 0).getTime() -
+              new Date(a.createdAt || 0).getTime()
+          )
+          const postsData = data.map(({ id, title, filename, createdAt, modifiedAt }) => ({
+            id,
+            title,
+            bodyFile: `/posts/${filename}`,
+            createdAt,
+            modifiedAt,
+          }))
+          setPosts(postsData)
+          setLoadingPosts(false)
+        }
+      )
       .catch(() => setLoadingPosts(false))
   }, [])
 
   useEffect(() => {
     if (selectedPostId == null) return
-
     const post = posts.find(p => p.id === selectedPostId)
     if (!post) return
     if (post.body) return
@@ -56,6 +77,18 @@ export default function App() {
   }, [selectedPostId, posts])
 
   const selectedPost = posts.find(p => p.id === selectedPostId)
+
+  const formatDate = (dateStr?: string) =>
+    dateStr
+      ? new Date(dateStr).toLocaleString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        })
+      : ""
 
   return (
     <div
@@ -98,7 +131,7 @@ export default function App() {
                 style={{
                   border: "none",
                   padding: "0.5rem",
-                  textAlign: "left",
+                  textAlign: "center",
                   width: "100%",
                   cursor: "pointer",
                 }}
@@ -145,10 +178,17 @@ export default function App() {
         {loadingBody && <p>Loading post content...</p>}
 
         {!loadingBody && selectedPost?.body && (
-          <article
-            style={{ marginTop: "1.5rem" }}
-            dangerouslySetInnerHTML={{ __html: selectedPost.body }}
-          />
+          <article style={{ marginTop: "1.5rem" }}>
+            <div style={{ fontSize: "0.9rem", marginBottom: "1rem", color: "var(--base01)" }}>
+              {selectedPost.createdAt && (
+                <div>Created: {formatDate(selectedPost.createdAt)}</div>
+              )}
+              {selectedPost.modifiedAt && (
+                <div>Updated: {formatDate(selectedPost.modifiedAt)}</div>
+              )}
+            </div>
+            <div dangerouslySetInnerHTML={{ __html: selectedPost.body }} />
+          </article>
         )}
       </main>
     </div>
