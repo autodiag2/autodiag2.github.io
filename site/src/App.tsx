@@ -20,7 +20,7 @@ export default function App() {
   const [homeContent, setHomeContent] = useState<string>("")
 
   useEffect(() => {
-    fetch("/index.html")
+    fetch("/main.html")
       .then(res => res.text())
       .then(html => setHomeContent(html))
       .catch(() => setHomeContent("<p>Welcome to autodiag2!</p>"))
