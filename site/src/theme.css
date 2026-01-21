@@ -17,6 +17,11 @@
   --green:   #859900;
 }
 
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+}
 .solarized-light {
   background: var(--base3);
   color: var(--base00);
@@ -31,8 +36,13 @@
 
 nav {
   display: flex;
+  background: var(--base2);
   gap: 1rem;
   padding: 1rem;
+}
+
+.solarized-dark nav {
+  background: var(--base02);
 }
 
 a {
