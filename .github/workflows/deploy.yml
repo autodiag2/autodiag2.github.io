@@ -3,7 +3,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main  # change if needed
+      - main
 
 jobs:
   build-and-deploy:
@@ -22,8 +22,11 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install dependencies
+      - name: Install dependencies (including cheerio)
         run: npm ci
+
+      - name: Generate posts index
+        run: node scripts/generatePosts.js
 
       - name: Build
         run: npm run build
@@ -33,4 +36,3 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./site/dist
-
