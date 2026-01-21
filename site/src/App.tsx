@@ -10,10 +10,18 @@ export default function App() {
   const [loadingPosts, setLoadingPosts] = useState(false)
   const [loadingBody, setLoadingBody] = useState(false)
   const [selectedPostId, setSelectedPostId] = useState<number | null>(null)
+  const [homeContent, setHomeContent] = useState<string>("")
+
+  useEffect(() => {
+    // Load home page content from public/index.html (or another file if preferred)
+    fetch("/index.html")
+      .then(res => res.text())
+      .then(html => setHomeContent(html))
+      .catch(() => setHomeContent("<p>Welcome to autodiag2!</p>"))
+  }, [])
 
   useEffect(() => {
     setLoadingPosts(true)
-    // Fetch posts index JSON listing available posts (id, title, filename)
     fetch("/posts/index.json")
       .then(res => res.json())
       .then((data: { id: number; title: string; filename: string }[]) => {
@@ -24,26 +32,23 @@ export default function App() {
         }))
         setPosts(postsData)
         setLoadingPosts(false)
-        if (postsData.length > 0) setSelectedPostId(postsData[0].id)
       })
       .catch(() => setLoadingPosts(false))
   }, [])
 
   useEffect(() => {
     if (selectedPostId == null) return
+
     const post = posts.find(p => p.id === selectedPostId)
     if (!post) return
-
-    if (post.body) return // already loaded
+    if (post.body) return
 
     setLoadingBody(true)
     fetch(post.bodyFile)
       .then(res => res.text())
       .then(html => {
         setPosts(prev =>
-          prev.map(p =>
-            p.id === post.id ? { ...p, body: html } : p
-          )
+          prev.map(p => (p.id === post.id ? { ...p, body: html } : p))
         )
         setLoadingBody(false)
       })
@@ -69,7 +74,13 @@ export default function App() {
         }}
       >
         <div className="presentation">
-          <a href="/">
+          <a
+            href="#"
+            onClick={e => {
+              e.preventDefault()
+              setSelectedPostId(null)
+            }}
+          >
             <img src={logo} alt="Logo" style={{ width: 200, height: 200 }} />
           </a>
           <div className="spacer"></div>
@@ -83,7 +94,7 @@ export default function App() {
               <button
                 key={id}
                 onClick={() => setSelectedPostId(id)}
-                className="post-button"
+                className={`post-button${id === selectedPostId ? " selected" : ""}`}
                 style={{
                   border: "none",
                   padding: "0.5rem",
@@ -96,7 +107,10 @@ export default function App() {
               </button>
             ))}
         </div>
-        <div className="social-icons" style={{ display: "flex", gap: "1rem", width: "100%" }}>
+        <div
+          className="social-icons"
+          style={{ display: "flex", gap: "1rem", width: "100%" }}
+        >
           <a href="https://github.com/autodiag2/">
             <img src={logo_github} alt="GitHub" style={{ width: 32, height: 32 }} />
           </a>
@@ -120,19 +134,22 @@ export default function App() {
         >
           Toggle theme
         </button>
-        <h1>elm327sim android</h1>
-        <p>
-          Autodiag democratizes access to car diagnostics and repair through
-          open tools and documentation.
-        </p>
+
+        {selectedPostId === null && !loadingBody && (
+          <article
+            dangerouslySetInnerHTML={{ __html: homeContent }}
+            style={{ marginTop: "1.5rem" }}
+          />
+        )}
+
         {loadingBody && <p>Loading post content...</p>}
+
         {!loadingBody && selectedPost?.body && (
           <article
             style={{ marginTop: "1.5rem" }}
             dangerouslySetInnerHTML={{ __html: selectedPost.body }}
           />
         )}
-        {!loadingBody && !selectedPost?.body && <p>Select a post from the menu</p>}
       </main>
     </div>
   )
