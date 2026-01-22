@@ -1,7 +1,62 @@
-<h2>Simulating a car from your android phone</h2>
-<br />
-Download the app from <a href="https://github.com/autodiag2/ELM327SimAndroid/releases/">github releases</a>.<br />
-<br />
-Start the sim !<br />
-<br />
-You can now connect from your prefered scantool, eg <a href="https://github.com/fr3ts0n/AndrOBD">AndrOBD</a><br />
+<article>
+  <h2 style="display: flex; align-items: center;">
+    <img src="/posts/assets/elm327sim_android/logo.png" style="width: 5rem;" />
+    Simulating a car from your Android phone
+  </h2>
+
+  <p>
+    You can simulate a car directly from your Android phone using the
+    ELM327SimAndroid application.
+  </p>
+
+  <p>
+    Download the application from
+    <a href="https://github.com/autodiag2/ELM327SimAndroid/releases/" target="_blank" rel="noopener">
+      GitHub releases
+    </a>
+    and install it on your device.
+  </p>
+
+  <p>
+    Once installed, start the simulator. The application runs a virtual
+    ELM327 interface on your phone, emulating a vehicle ECU and standard
+    OBD-II responses.
+  </p>
+
+  <p>
+    You can then connect your preferred diagnostic tool to the simulator,
+    exactly as if you were connected to a real car.
+    For example, you can use
+    <a href="https://github.com/fr3ts0n/AndrOBD" target="_blank" rel="noopener">
+      AndrOBD
+    </a>,
+    an Android OBD diagnostic application compatible with ELM327 devices.
+  </p>
+
+  <p>
+    This setup is useful for testing diagnostic applications, developing
+    scantools, or experimenting with OBD-II protocols without requiring
+    physical vehicle hardware.
+  </p>
+
+  <div style="display: flex; flex-direction: column;">
+    <h3>Inspecting the data sent by the scantool to ELM:</h3>
+    <img src="/posts/assets/elm327sim_android/log.png" style="
+        width: 10rem;
+        margin-left: auto;
+        margin-right: auto;
+        box-shadow: 0px 0px 20px 6px;
+    " />
+  </div>
+
+  <div style="display: flex; flex-direction: column;">
+    <h3>Change the adapter emulation kind (Bluetooth, Bluetooth Low Energy, Wifi)</h3>
+    <img src="/posts/assets/elm327sim_android/settings.png" style="
+        width: 10rem;
+        margin-left: auto;
+        margin-right: auto;
+        box-shadow: 0px 0px 20px 6px;
+    " />
+  </div>
+
+</article>
