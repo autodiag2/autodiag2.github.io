@@ -11,8 +11,26 @@ type Post = {
   modifiedAt?: string
 }
 
+function usePrefersDark() {
+  const get = () =>
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+
+  const [dark, setDark] = useState(get)
+
+  useEffect(() => {
+    const mql = window.matchMedia("(prefers-color-scheme: dark)")
+    const onChange = (e: MediaQueryListEvent) => setDark(e.matches)
+    mql.addEventListener("change", onChange)
+    return () => mql.removeEventListener("change", onChange)
+  }, [])
+
+  return dark
+}
+
 export default function App() {
-  const [dark, setDark] = useState(false)
+  const prefersDark = usePrefersDark()
+  const [dark, setDark] = useState(prefersDark)
   const [posts, setPosts] = useState<Post[]>([])
   const [loadingPosts, setLoadingPosts] = useState(false)
   const [loadingBody, setLoadingBody] = useState(false)
@@ -25,6 +43,10 @@ export default function App() {
       .then(html => setHomeContent(html))
       .catch(() => setHomeContent("<p>Welcome to autodiag2!</p>"))
   }, [])
+
+  useEffect(() => {
+    setDark(prefersDark)
+  }, [prefersDark])
 
   useEffect(() => {
     setLoadingPosts(true)
@@ -157,7 +179,7 @@ export default function App() {
         }}
       >
         <button
-          onClick={() => setDark(!dark)}
+          onClick={() => setDark(d => !d)}
           style={{
             position: "fixed",
             top: 16,
@@ -165,7 +187,7 @@ export default function App() {
             zIndex: 1000,
           }}
         >
-          Toggle theme
+          {dark ? "light mode" : "dark mode"}
         </button>
 
         {selectedPostId === null && !loadingBody && (
