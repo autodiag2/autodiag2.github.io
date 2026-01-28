@@ -1,0 +1,3 @@
+[submodule "adn/adn"]
+	path = adn/adn
+	url = https://github.com/autodiag2/adn

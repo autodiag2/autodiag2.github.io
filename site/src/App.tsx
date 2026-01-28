@@ -158,6 +158,15 @@ export default function App() {
           >
             🔐 Password Generator
           </button>
+          <button
+            onClick={() => openInNewTab("/tools/adn/src/index.html")}
+            className="link-button"
+            style={{
+                  width: "100%"
+                }}
+          >
+            Game of life
+          </button>
         </div>
         <div>
           <h3>Posts</h3>
