@@ -103,3 +103,20 @@ button {
 button:hover {
   background: var(--yellow);
 }
+.solarized-light .link {
+  border: 1px solid var(--base01);
+}
+.solarized-dark .link {
+  border: 1px solid var(--base1);
+}
+.link {
+  display: flex;
+  align-items: center;
+  gap: 10;
+  text-decoration: none;
+  padding: 0.6rem;
+  border-radius: 8px;
+  color: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}

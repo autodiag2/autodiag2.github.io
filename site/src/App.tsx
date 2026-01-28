@@ -142,6 +142,20 @@ export default function App() {
           <span className="title">autodiag2</span>
         </div>
         <div>
+          <h3 style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            Online Tools
+          </h3>
+
+          <a
+            href="/tools/password_generator.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="link"
+          >
+            🔐 Password Generator
+          </a>
+        </div>
+        <div>
           <h3>Posts</h3>
           {loadingPosts && <p>Loading posts...</p>}
           {!loadingPosts &&
