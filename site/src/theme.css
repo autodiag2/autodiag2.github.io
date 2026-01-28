@@ -33,26 +33,7 @@ html, body {
   color: var(--base0);
   min-height: 100vh;
 }
-.post-button {
-  border-radius: 100px;
-  margin-top: 0.5rem;
-}
-.solarized-light .post-button {
-  background: var(--base3);
-  color: var(--base00);
-}
-.solarized-dark .post-button {
-  background: var(--base03);
-  color: var(--base0);
-}
-.solarized-light .post-button:hover {
-  background: var(--base03);
-  color: var(--base2);
-}
-.solarized-dark .post-button:hover {
-  background: var(--base3);
-  color: var(--base02);
-}
+
 nav {
   display: flex;
   background: var(--base2);
@@ -103,20 +84,33 @@ button {
 button:hover {
   background: var(--yellow);
 }
-.solarized-light .link {
+.post-button,
+.link-button {
+  border-radius: 100px;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  text-align: center;
+  cursor: pointer;
+}
+.solarized-light .post-button,
+.solarized-light .link-button {
+  background: var(--base3);
+  color: var(--base00);
   border: 1px solid var(--base01);
 }
-.solarized-dark .link {
+.solarized-dark .post-button,
+.solarized-dark .link-button {
+  background: var(--base03);
+  color: var(--base0);
   border: 1px solid var(--base1);
 }
-.link {
-  display: flex;
-  align-items: center;
-  gap: 10;
-  text-decoration: none;
-  padding: 0.6rem;
-  border-radius: 8px;
-  color: inherit;
-  font-weight: 600;
-  cursor: pointer;
+.solarized-light .post-button:hover,
+.solarized-light .link-button:hover {
+  background: var(--base03);
+  color: var(--base2);
+}
+.solarized-dark .post-button:hover,
+.solarized-dark .link-button:hover {
+  background: var(--base3);
+  color: var(--base02);
 }

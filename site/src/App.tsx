@@ -28,6 +28,9 @@ function usePrefersDark() {
   return dark
 }
 
+function openInNewTab(url: string) {
+  window.open(url, "_blank", "noopener,noreferrer")
+}
 export default function App() {
   const prefersDark = usePrefersDark()
   const [dark, setDark] = useState(prefersDark)
@@ -141,19 +144,20 @@ export default function App() {
           <div className="spacer"></div>
           <span className="title">autodiag2</span>
         </div>
-        <div>
+        <div style={{ width: "100%" }}>
           <h3 style={{ display: "flex", alignItems: "center", gap: 8 }}>
             Online Tools
           </h3>
 
-          <a
-            href="/tools/password_generator.html"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="link"
+          <button
+            onClick={() => openInNewTab("/tools/password_generator.html")}
+            className="link-button"
+            style={{
+                  width: "100%"
+                }}
           >
             🔐 Password Generator
-          </a>
+          </button>
         </div>
         <div>
           <h3>Posts</h3>
@@ -165,11 +169,7 @@ export default function App() {
                 onClick={() => setSelectedPostId(id)}
                 className={`post-button${id === selectedPostId ? " selected" : ""}`}
                 style={{
-                  border: "none",
-                  padding: "0.5rem",
-                  textAlign: "center",
-                  width: "100%",
-                  cursor: "pointer",
+                  width: "100%"
                 }}
               >
                 {title}
@@ -178,11 +178,16 @@ export default function App() {
         </div>
         <div
           className="social-icons"
-          style={{ display: "flex", gap: "1rem", width: "100%" }}
+          style={{ width: "100%" }}
         >
-          <a href="https://github.com/autodiag2/">
-            <img src={logo_github} alt="GitHub" style={{ width: 32, height: 32 }} />
-          </a>
+          <h3>More</h3>
+          <div
+            style={{ display: "flex", gap: "1rem", width: "100%" }}
+          >
+            <a href="https://github.com/autodiag2/">
+              <img src={logo_github} alt="GitHub" style={{ width: 32, height: 32 }} />
+            </a>
+          </div>
         </div>
       </nav>
       <main
@@ -190,6 +195,7 @@ export default function App() {
           flexGrow: 1,
           padding: "1rem",
           overflowY: "auto",
+          width: "100%"
         }}
       >
         <button
