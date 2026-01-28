@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>DNA</title>
+  <link rel="stylesheet" href="/tools/adn/src/index.css" />
+</head>
+<body>
+    <div id="gc-global-container">
+      <div id="side-panel">
+        <header id="toggle-panel">
+          <span id="toggle-panel-label">Menu</span>
+          <button id="toggle-button">≡</button>
+        </header>
+        <div id="side-panel-content">
+          <div id="tab-buttons">
+            <div class="tab-button active" data-tab="controls">Controls</div>
+            <div class="tab-button" data-tab="upgrades">Upgrades</div>
+            <div class="tab-button" data-tab="debug">Debug</div>
+          </div>
+          <div id="tab-content">
+            <div id="tab-controls">
+              <div>
+                <button id="gc-controls-playpause">Pause</button>
+              </div>
+            </div>
+            <div id="tab-upgrades" style="display:none;">
+              <div id="tab-upgrades-points">
+                Points: <p id="tab-upgrades-points-amount">0</p>
+              </div>
+              <div class="tab-upgrades-energy">
+                Energy <b id="tab-upgrades-energy-amount">0</b> Joules
+              </div>
+              <div id="molecules-upgrade">
+                <div>
+                  <hr>
+                  Molecules
+                  <hr>
+                </div>
+                <div id="molecule-upgrade-ATP" class="molecule-upgrade">
+                  <img src="/tools/adn/assets/img/prod/atp.png" style="width: 50px; height: auto;" />ATP: <p id="molecule-upgrade-ATP-cost">0</p> <button id="molecule-upgrade-ATP-amount-add">+</button> <button id="molecule-upgrade-ATP-amount-sub">-</button>
+                </div>
+                <div id="molecule-upgrade-myosin" class="molecule-upgrade">
+                  <img src="/tools/adn/assets/img/prod/myosin.png" style="width: 50px; height: auto;" />Myosin: <p id="molecule-upgrade-myosin-cost">0</p> <button id="molecule-upgrade-myosin-amount-add">+</button><button id="molecule-upgrade-myosin-amount-sub">-</button>
+                </div>
+                <div id="molecule-upgrade-PFK1" class="molecule-upgrade">
+                  <img src="/tools/adn/assets/img/prod/PFK-1.png" style="width: 50px; height: auto;" />PFK-1: <p id="molecule-upgrade-PFK1-cost">0</p> <button id="molecule-upgrade-PFK1-amount-add">+</button><button id="molecule-upgrade-PFK1-amount-sub">-</button>
+                </div>
+                <div id="molecule-upgrade-glucose" class="molecule-upgrade">
+                  <img src="/tools/adn/assets/img/prod/glucose.png" style="width: 50px; height: auto;" />glucose: <p id="molecule-upgrade-glucose-cost">0</p> <button id="molecule-upgrade-glucose-amount-add">+</button><button id="molecule-upgrade-glucose-amount-sub">-</button>
+                </div>
+                <div id="molecule-upgrade-amylase" class="molecule-upgrade">
+                  <img src="/tools/adn/assets/img/prod/amylase.png" style="width: 50px; height: auto;" />Amylase: <p id="molecule-upgrade-amylase-cost">0</p> <button id="molecule-upgrade-amylase-amount-add">+</button><button id="molecule-upgrade-amylase-amount-sub">-</button>
+                </div>
+                <div id="molecule-upgrade-apple" class="molecule-upgrade">
+                  <img src="/tools/adn/assets/img/prod/apple.png" style="width: 50px; height: auto;" />Apple: <p id="molecule-upgrade-apple-cost">0</p> <button id="molecule-upgrade-apple-amount-add">+</button><button id="molecule-upgrade-apple-amount-sub">-</button>
+                </div>
+              </div>
+              <div id="environment-upgrades">
+                <div>
+                  <hr>
+                  Environment
+                  <hr>
+                </div>
+                <div id="environment-upgrade-temperature" class="environment-upgrade">
+                  <label>Temperature (°C)</label>
+                  <input id="environment-upgrade-temperature-amount" type="number" step="1" value="20" />
+                  <button id="environment-upgrade-temperature-validate">Validate</button>
+                </div>
+              </div>
+              <div id="player-upgrades">
+                <div>
+                  <hr>
+                  Player
+                  <hr>
+                </div>
+                <div id="player-upgrade-walk" class="player-upgrade">
+                  <label>Walk level: <b id="player-upgrade-walk-amount">1</b></label>
+                  <button id="player-upgrade-walk-amount-add">+</button>
+                  <button id="player-upgrade-walk-amount-sub">-</button>
+                </div>
+              </div>
+            </div>
+            <div id="tab-debug" style="display: none;">
+              <div class="tab-debug-speed">
+                Points: <input type="number" id="tab-debug-control-points-amount" value="1000" /> <button id="tab-debug-control-points-validate">Valider</button>
+              </div>
+              <div style="margin-bottom: 15px;">
+                <label>Game speed</label>
+                <input id="tab-debug-speed" type="number" step="1" value="1" />
+              </div>
+              <div class="tab-debug-control">
+                Walk level: <input type="number" id="tab-debug-control-walk-level" value="1" step="1" />
+              </div>
+              <div class="tab-debug-control">
+                <hr>
+                Prefilled scenarios
+                <hr>
+                <button id="tab-debug-control-scenario-1">Scenario 1</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="gc">
+        <div id="gc-micro"></div>
+        <div id="gc-macro"></div>
+      </div>
+    </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
+  <script>
+    const eventBus = new Phaser.Events.EventEmitter();
+    collision_detect = (o1, o2, handler) => {
+      const r1 = o1.getBounds();
+      const r2 = o2.getBounds();
+
+      if (Phaser.Geom.Intersects.RectangleToRectangle(r1, r2)) {
+        handler(o1, o2);
+      }
+    }
+    // used by child to signal the model that some change have been maid to the model
+    function signalModelChange() {
+      eventBus.emit("gameStateChangedBackPropagation");
+    }
+  </script>
+  <script type="text/javascript" src="/tools/adn/src/index.js"></script>
+  <script type="text/javascript" src="/tools/adn/src/micro.js"></script>
+  <script type="text/javascript" src="/tools/adn/src/macro.js"></script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+@font-face {
+  font-family: 'AndyB';
+  src: url('/tools/adn/assets/font/ANDYB.TTF') format('truetype');
+}
+
+* {
+  font-family: 'AndyB', sans-serif;
+}
+button {
+    cursor: pointer;
+    border-radius: 1000px;
+}
+body {
+    margin: 0;
+    overflow: hidden;
+}
+#gc {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: row;
+}
+#gc div {
+    width: 50%;
+    height: 100%;
+}
+#gc-micro {
+    background: #1a1a1a;
+    position: relative;
+}
+#gc-global-container {
+    width: 100%;
+    height: 100%;
+}
+#gc-controls {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.75);
+    margin: 10px;
+    border: 1px solid #000;
+    border-radius: 1000px;
+    box-shadow: inset 0 0 10px grey;
+}
+#gc-micro-time-input {
+    height: fit-content;
+}
+.gc-control {
+    padding: 10px;
+}
+#gc-global-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+#side-panel {
+  width: 280px;
+  background: rgba(255, 255, 255, 0.9);
+  border-right: 1px solid #000;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease;
+  font-family: 'AndyB', sans-serif;
+}
+#side-panel.collapsed {
+  width: 40px;
+}
+#side-panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #000;
+  cursor: pointer;
+  user-select: none;
+}
+#side-panel header span {
+  font-weight: bold;
+}
+#tab-buttons {
+  display: flex;
+  border-bottom: 1px solid #000;
+}
+.tab-button {
+  flex: 1;
+  padding: 10px;
+  cursor: pointer;
+  text-align: center;
+  border-right: 1px solid #000;
+  background: #ddd;
+  user-select: none;
+}
+.tab-button.active {
+  background: #bbb;
+  font-weight: bold;
+}
+.tab-button:last-child {
+  border-right: none;
+}
+#gc {
+  flex: 1;
+  height: 100vh;
+  position: relative;
+}
+.molecule-upgrade, .environment-upgrade, .player-upgrade {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+}
+#tab-upgrades-points {
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+}
+#side-panel-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+#tab-content {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    min-height: 0;
+    padding: 10px;
+}
