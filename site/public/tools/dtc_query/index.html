@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>🔎 DTC query</title>
+  <link rel="icon" href="/favicon.png" />
+  <style>
+    :root{
+      --base03:#002b36; --base02:#073642; --base01:#586e75; --base00:#657b83;
+      --base0:#839496; --base1:#93a1a1; --base2:#eee8d5; --base3:#fdf6e3;
+      --yellow:#b58900; --orange:#cb4b16; --red:#dc322f; --magenta:#d33682;
+      --violet:#6c71c4; --blue:#268bd2; --cyan:#2aa198; --green:#859900;
+
+      --radius:14px;
+      --radius2:10px;
+      --shadow:0 18px 60px rgba(0,0,0,.18);
+      --mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      --sans: ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+    }
+
+    .theme-light{
+      --bg:var(--base3);
+      --panel:rgba(255,255,255,.65);
+      --panel2:rgba(253,246,227,.85);
+      --text:var(--base00);
+      --muted:var(--base01);
+      --line:rgba(88,110,117,.25);
+      --chip:rgba(238,232,213,.8);
+      --focus:rgba(38,139,210,.25);
+      --shadow:0 18px 60px rgba(0,0,0,.10);
+    }
+    .theme-dark{
+      --bg:var(--base03);
+      --panel:rgba(7,54,66,.65);
+      --panel2:rgba(7,54,66,.85);
+      --text:var(--base0);
+      --muted:var(--base01);
+      --line:rgba(147,161,161,.18);
+      --chip:rgba(7,54,66,.9);
+      --focus:rgba(38,139,210,.22);
+      --shadow:0 18px 60px rgba(0,0,0,.35);
+    }
+
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:var(--sans);
+      background:
+        radial-gradient(1200px 800px at 15% 5%, rgba(38,139,210,.14), transparent 60%),
+        radial-gradient(1100px 700px at 85% 10%, rgba(211,54,130,.10), transparent 55%),
+        radial-gradient(900px 600px at 70% 85%, rgba(42,161,152,.10), transparent 55%),
+        var(--bg);
+      color:var(--text);
+    }
+
+    .wrap{max-width:1180px;margin:0 auto;padding:18px 14px 30px}
+    .topbar{
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+      padding:12px 14px;
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, var(--panel), var(--panel2));
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      position:sticky; top:10px; z-index:20;
+      backdrop-filter: blur(10px);
+      flex-wrap:wrap;
+    }
+    .brand{display:flex; flex-direction:column; gap:2px; min-width:260px}
+    .brand h1{font-size:16px;margin:0;letter-spacing:.2px}
+    .sub{font-size:12px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .sub code{
+      font-family:var(--mono); font-size:11px; padding:2px 6px;
+      border:1px solid var(--line); border-radius:999px; background:var(--chip);
+    }
+
+    .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+    .btn{
+      appearance:none; border:1px solid var(--line); background:var(--chip); color:var(--text);
+      padding:8px 10px; border-radius:999px; font-size:13px; cursor:pointer; user-select:none;
+      display:inline-flex; align-items:center; gap:8px;
+    }
+    .btn:hover{border-color:rgba(38,139,210,.55)}
+    .btn:active{transform:translateY(1px)}
+    .btn.primary{
+      background:linear-gradient(180deg, rgba(38,139,210,.24), rgba(38,139,210,.10));
+      border-color:rgba(38,139,210,.55);
+    }
+    .btn.danger{
+      background:linear-gradient(180deg, rgba(220,50,47,.20), rgba(220,50,47,.08));
+      border-color:rgba(220,50,47,.55);
+    }
+
+    .grid{margin-top:14px; display:grid; grid-template-columns: 1.35fr .65fr; gap:14px}
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr} .topbar{position:relative;top:auto} }
+
+    .card{
+      border:1px solid var(--line);
+      background:linear-gradient(180deg, var(--panel), var(--panel2));
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px;
+      backdrop-filter: blur(10px);
+    }
+    .card h2{margin:0 0 10px; font-size:14px; color:var(--muted); font-weight:600; letter-spacing:.2px}
+
+    .row{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
+    @media (max-width: 560px){ .row{grid-template-columns:1fr} }
+
+    label{display:flex; flex-direction:column; gap:6px; font-size:12px; color:var(--muted)}
+    input[type="text"], select{
+      width:100%; box-sizing:border-box;
+      padding:10px 10px;
+      border-radius:var(--radius2);
+      border:1px solid var(--line);
+      background:rgba(0,0,0,0);
+      color:var(--text);
+      outline:none;
+    }
+    input[type="text"]::placeholder{color:rgba(131,148,150,.85)}
+    input[type="text"]:focus, select:focus{
+      border-color:rgba(38,139,210,.7);
+      box-shadow:0 0 0 4px var(--focus);
+    }
+    select option{background:var(--bg); color:var(--text)}
+
+    .status{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+    .mono{font-family:var(--mono)}
+    .kbd{
+      font-family:var(--mono);
+      padding:2px 6px;
+      border:1px solid var(--line);
+      border-radius:8px;
+      background:var(--chip);
+      color:var(--muted);
+    }
+
+    .table-wrap{overflow:auto; border:1px solid var(--line); border-radius:var(--radius)}
+    table{width:100%; border-collapse:collapse; font-size:13px; min-width:820px}
+    thead th{
+      position:sticky; top:0;
+      background:linear-gradient(180deg, var(--panel2), var(--panel));
+      border-bottom:1px solid var(--line);
+      color:var(--muted);
+      font-weight:600;
+      text-align:left;
+      padding:10px 10px;
+      white-space:nowrap;
+    }
+    tbody td{border-bottom:1px solid rgba(88,110,117,.18); padding:10px 10px; vertical-align:top}
+    tbody tr:hover{background:rgba(38,139,210,.06)}
+    .id{font-family:var(--mono); color:var(--cyan); font-weight:600; white-space:nowrap}
+    .muted{color:var(--muted)}
+    .pager{margin-top:10px; display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap}
+  </style>
+</head>
+
+<body class="theme-light">
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <h1>DTC JSON Client</h1>
+        <div class="sub">
+          <span id="sourceInfo">source: <code>not loaded</code></span>
+          <span id="dbInfo">entries: <code>0</code></span>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="btnTheme">theme: auto</button>
+        <button class="btn primary" id="btnLoadLatest">load latest dtc.json</button>
+        <button class="btn" id="btnOpenLocal">open local dtc.json</button>
+        <button class="btn danger" id="btnReset">reset</button>
+        <input id="filePick" type="file" accept=".json,application/json" style="display:none" />
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Query</h2>
+        <div class="row">
+          <label>
+            Search (id / desc)
+            <input id="q" type="text" placeholder="e.g. P0012 or camshaft" />
+          </label>
+          <label>
+            Match
+            <select id="matchMode">
+              <option value="contains" selected>contains</option>
+              <option value="prefix">prefix</option>
+              <option value="exact">exact</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <label>
+            Brand (manufacturer)
+            <select id="fBrand"><option value="">(any)</option></select>
+          </label>
+          <label>
+            Engine model
+            <select id="fEngine"><option value="">(any)</option></select>
+          </label>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <label>
+            ECU model
+            <select id="fEcu"><option value="">(any)</option></select>
+          </label>
+          <label>
+            Page size
+            <select id="pageSize">
+              <option value="25">25</option>
+              <option value="50" selected>50</option>
+              <option value="100">100</option>
+              <option value="250">250</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="pager">
+          <div class="status">
+            <button class="btn" id="btnSearch">search</button>
+            <span class="muted">tips:</span>
+            <span class="kbd">Enter</span>
+            <span class="kbd">Ctrl</span>+<span class="kbd">K</span>
+          </div>
+          <div class="status" id="statusLine">Idle</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Notes</h2>
+        <div class="muted" style="font-size:12px; line-height:1.5">
+          <div>This client expects a hierarchical <span class="mono">dtc.json</span>:</div>
+          <div class="mono" style="margin-top:8px">manufacturer → engine_model → ecu_model → { "P0012": "desc", ... }</div>
+          <div style="margin-top:10px">
+            If the latest release does not ship <span class="mono">dtc.json</span>, generate it and load locally.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h2>Results</h2>
+
+      <div class="status" style="margin:0 0 10px">
+        <span>matches: <span class="mono" id="matchCount">0</span></span>
+        <span>page: <span class="mono" id="pageInfo">-</span></span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:110px">id</th>
+              <th>desc</th>
+              <th style="width:180px">brand</th>
+              <th style="width:200px">engine_model</th>
+              <th style="width:200px">ecu_model</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <tr><td colspan="5" class="muted">Load dtc.json to start.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pager">
+        <div class="status">
+          <button class="btn" id="btnPrev">prev</button>
+          <button class="btn" id="btnNext">next</button>
+          <button class="btn" id="btnTop">top</button>
+        </div>
+        <div class="status">
+          <button class="btn" id="btnExportCsv">export csv (page)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const GITHUB_LATEST = "https://api.github.com/repos/autodiag2/database/releases/latest"
+    const OWNER = "autodiag2"
+    const REPO = "database"
+
+    const el = (id) => document.getElementById(id)
+
+    const state = {
+      themeMode: "auto",
+      dataTree: null,
+      flat: [],
+      offset: 0,
+      pageSize: 50,
+      total: 0,
+      source: null
+    }
+
+    const norm = (s) => (s == null ? "" : String(s)).trim()
+    const toLower = (s) => norm(s).toLowerCase()
+
+    function prefersDark(){
+      return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+    }
+
+    function applyTheme(mode){
+      const dark = mode === "dark" ? true : mode === "light" ? false : prefersDark()
+      document.body.classList.toggle("theme-dark", dark)
+      document.body.classList.toggle("theme-light", !dark)
+      el("btnTheme").textContent = mode === "auto" ? ("theme: auto (" + (dark ? "dark" : "light") + ")") : ("theme: " + mode)
+    }
+
+    function loadTheme(){
+      const saved = localStorage.getItem("dtc_theme_mode")
+      state.themeMode = (saved === "dark" || saved === "light" || saved === "auto") ? saved : "auto"
+      applyTheme(state.themeMode)
+    }
+
+    function toggleTheme(){
+      const m = state.themeMode
+      const next = m === "auto" ? "dark" : (m === "dark" ? "light" : "auto")
+      state.themeMode = next
+      localStorage.setItem("dtc_theme_mode", next)
+      applyTheme(next)
+    }
+
+    function setStatus(s){ el("statusLine").textContent = s }
+    function setSourceInfo(s){
+      el("sourceInfo").innerHTML = "source: <code>" + (s || "not loaded") + "</code>"
+    }
+    function setDbInfo(n){
+      el("dbInfo").innerHTML = "entries: <code>" + String(n || 0) + "</code>"
+    }
+
+    function fillSelect(sel, values, keep){
+      const prev = keep ? sel.value : ""
+      sel.innerHTML = ""
+      const any = document.createElement("option")
+      any.value = ""
+      any.textContent = "(any)"
+      sel.appendChild(any)
+      for (const v of values){
+        const o = document.createElement("option")
+        o.value = v
+        o.textContent = v
+        sel.appendChild(o)
+      }
+      if (keep && [...sel.options].some(o => o.value === prev)) sel.value = prev
+    }
+
+    function parseTreeToFlat(tree){
+      const out = []
+      if (!tree || typeof tree !== "object") return out
+
+      for (const brand of Object.keys(tree)){
+        const engines = tree[brand]
+        if (!engines || typeof engines !== "object") continue
+
+        for (const engine of Object.keys(engines)){
+          const ecus = engines[engine]
+          if (!ecus || typeof ecus !== "object") continue
+
+          for (const ecu of Object.keys(ecus)){
+            const codes = ecus[ecu]
+            if (!codes || typeof codes !== "object") continue
+
+            for (const id of Object.keys(codes)){
+              const desc = codes[id]
+              const d = norm(desc)
+              const c = norm(id)
+              if (c.length && d.length){
+                out.push({ id: c, desc: d, brand, engine, ecu })
+              }
+            }
+          }
+        }
+      }
+
+      out.sort((a,b) => (a.id < b.id ? -1 : (b.id < a.id ? 1 : (a.brand < b.brand ? -1 : (b.brand < a.brand ? 1 : 0)))))
+      return out
+    }
+
+    function rebuildFilters(){
+      const tree = state.dataTree
+      const brands = tree ? Object.keys(tree).sort((a,b)=> a < b ? -1 : (b < a ? 1 : 0)) : []
+      fillSelect(el("fBrand"), brands, false)
+      fillSelect(el("fEngine"), [], false)
+      fillSelect(el("fEcu"), [], false)
+    }
+
+    function rebuildDependentFilters(){
+      const tree = state.dataTree
+      const brand = el("fBrand").value
+      const engine = el("fEngine").value
+
+      const engines = (tree && brand && tree[brand] && typeof tree[brand] === "object") ? Object.keys(tree[brand]) : []
+      engines.sort((a,b)=> a < b ? -1 : (b < a ? 1 : 0))
+      fillSelect(el("fEngine"), engines, true)
+
+      const brand2 = el("fBrand").value
+      const engine2 = el("fEngine").value
+
+      const ecus =
+        (tree && brand2 && engine2 && tree[brand2] && tree[brand2][engine2] && typeof tree[brand2][engine2] === "object")
+          ? Object.keys(tree[brand2][engine2])
+          : []
+      ecus.sort((a,b)=> a < b ? -1 : (b < a ? 1 : 0))
+      fillSelect(el("fEcu"), ecus, true)
+    }
+
+    function matchText(hay, needle, mode){
+      if (mode === "exact") return hay === needle
+      if (mode === "prefix") return hay.startsWith(needle)
+      return hay.includes(needle)
+    }
+
+    function runQuery(resetOffset){
+      if (!state.flat.length){
+        setStatus("No data loaded.")
+        return
+      }
+
+      state.pageSize = parseInt(el("pageSize").value, 10) || 50
+      if (resetOffset) state.offset = 0
+
+      const q = toLower(el("q").value)
+      const mm = el("matchMode").value
+      const brand = el("fBrand").value
+      const engine = el("fEngine").value
+      const ecu = el("fEcu").value
+
+      const filtered = []
+      for (const r of state.flat){
+        if (brand && r.brand !== brand) continue
+        if (engine && r.engine !== engine) continue
+        if (ecu && r.ecu !== ecu) continue
+
+        if (q){
+          const idh = toLower(r.id)
+          const dh = toLower(r.desc)
+          if (!matchText(idh, q, mm) && !matchText(dh, q, mm)) continue
+        }
+
+        filtered.push(r)
+      }
+
+      state.total = filtered.length
+
+      const start = state.total === 0 ? 0 : state.offset
+      const end = Math.min(state.offset + state.pageSize, state.total)
+      const pageRows = filtered.slice(start, end)
+
+      renderRows(pageRows)
+      updatePager()
+
+      setStatus("Ready")
+    }
+
+    function renderRows(rows){
+      const tb = el("tbody")
+      tb.innerHTML = ""
+      if (!rows.length){
+        const tr = document.createElement("tr")
+        const td = document.createElement("td")
+        td.colSpan = 5
+        td.className = "muted"
+        td.textContent = "No results."
+        tr.appendChild(td)
+        tb.appendChild(tr)
+        return
+      }
+
+      for (const r of rows){
+        const tr = document.createElement("tr")
+
+        const tdId = document.createElement("td")
+        tdId.className = "id"
+        tdId.textContent = r.id
+        tr.appendChild(tdId)
+
+        const tdDesc = document.createElement("td")
+        tdDesc.textContent = r.desc
+        tr.appendChild(tdDesc)
+
+        const tdB = document.createElement("td")
+        tdB.textContent = r.brand
+        tr.appendChild(tdB)
+
+        const tdE = document.createElement("td")
+        tdE.textContent = r.engine
+        tr.appendChild(tdE)
+
+        const tdU = document.createElement("td")
+        tdU.textContent = r.ecu
+        tr.appendChild(tdU)
+
+        tb.appendChild(tr)
+      }
+    }
+
+    function updatePager(){
+      const ps = state.pageSize
+      const start = state.total === 0 ? 0 : (state.offset + 1)
+      const end = Math.min(state.offset + ps, state.total)
+
+      el("matchCount").textContent = String(state.total)
+      el("pageInfo").textContent = state.total === 0 ? "-" : (start + "–" + end)
+
+      el("btnPrev").disabled = !(state.offset > 0)
+      el("btnNext").disabled = !((state.offset + ps) < state.total)
+    }
+
+    function escapeCsv(s){
+      const v = (s ?? "").toString()
+      if (v.includes('"') || v.includes(",") || v.includes("\n") || v.includes("\r")) return '"' + v.replaceAll('"','""') + '"'
+      return v
+    }
+
+    function downloadText(filename, text){
+      const blob = new Blob([text], { type: "text/plain;charset=utf-8" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    }
+
+    async function fetchLatestRelease(){
+      const res = await fetch(GITHUB_LATEST, { headers: { "Accept": "application/vnd.github+json" } })
+      if (!res.ok) throw new Error("GitHub API error: " + res.status + " " + res.statusText)
+      return await res.json()
+    }
+
+    async function tryFetchJson(url){
+      const res = await fetch(url, { cache: "no-store" })
+      if (!res.ok) return null
+      const ct = res.headers.get("content-type") || ""
+      if (!ct.includes("json") && !url.toLowerCase().endsWith(".json")) return null
+      return await res.json()
+    }
+
+    async function loadLatestDtcJson(){
+
+      setStatus("Trying dtc.json paths…")
+      u = "/tools/dtc_query/dtc.json"
+      const j = await tryFetchJson(u)
+      if (j){
+        state.source = u
+        await useDtcJson(j, u)
+        return
+      }
+    
+
+      setSourceInfo("not found")
+      setStatus("dtc.json not found in url; load local file.")
+      throw new Error("dtc.json not found")
+    }
+
+    async function useDtcJson(j, sourceLabel){
+      if (!j || typeof j !== "object"){
+        throw new Error("Invalid dtc.json (expected object).")
+      }
+
+      setStatus("Indexing…")
+      state.dataTree = j
+      state.flat = parseTreeToFlat(j)
+      setDbInfo(state.flat.length)
+      rebuildFilters()
+      rebuildDependentFilters()
+      state.offset = 0
+      runQuery(true)
+      setSourceInfo(sourceLabel ? sourceLabel : "loaded")
+      setStatus("Ready")
+    }
+
+    async function openLocal(file){
+      setStatus("Reading local file…")
+      const buf = await file.arrayBuffer()
+      const txt = new TextDecoder("utf-8").decode(buf)
+      const j = JSON.parse(txt)
+      await useDtcJson(j, "local:" + file.name)
+    }
+
+    function resetAll(){
+      state.dataTree = null
+      state.flat = []
+      state.offset = 0
+      state.pageSize = 50
+      state.total = 0
+      state.source = null
+
+      el("q").value = ""
+      el("matchMode").value = "contains"
+      el("pageSize").value = "50"
+      fillSelect(el("fBrand"), [], false)
+      fillSelect(el("fEngine"), [], false)
+      fillSelect(el("fEcu"), [], false)
+
+      el("tbody").innerHTML = "<tr><td colspan='5' class='muted'>Load dtc.json to start.</td></tr>"
+      el("matchCount").textContent = "0"
+      el("pageInfo").textContent = "-"
+      setSourceInfo("not loaded")
+      setDbInfo(0)
+      setStatus("Idle")
+    }
+
+    function bind(){
+      el("btnTheme").addEventListener("click", toggleTheme)
+
+      el("btnLoadLatest").addEventListener("click", async () => {
+        try{
+          await loadLatestDtcJson()
+        } catch (e){
+          setStatus(String(e && e.message ? e.message : e))
+        }
+      })
+
+      el("btnOpenLocal").addEventListener("click", () => el("filePick").click())
+      el("filePick").addEventListener("change", async (e) => {
+        const f = e.target.files && e.target.files[0]
+        e.target.value = ""
+        if (!f) return
+        try{
+          await openLocal(f)
+        } catch (err){
+          setStatus(String(err && err.message ? err.message : err))
+        }
+      })
+
+      el("btnReset").addEventListener("click", resetAll)
+
+      el("btnSearch").addEventListener("click", () => runQuery(true))
+      el("q").addEventListener("keydown", (e) => { if (e.key === "Enter") runQuery(true) })
+
+      el("fBrand").addEventListener("change", () => {
+        rebuildDependentFilters()
+        runQuery(true)
+      })
+      el("fEngine").addEventListener("change", () => {
+        rebuildDependentFilters()
+        runQuery(true)
+      })
+      el("fEcu").addEventListener("change", () => runQuery(true))
+      el("matchMode").addEventListener("change", () => runQuery(true))
+      el("pageSize").addEventListener("change", () => runQuery(true))
+
+      el("btnPrev").addEventListener("click", () => {
+        state.offset = Math.max(0, state.offset - state.pageSize)
+        runQuery(false)
+      })
+      el("btnNext").addEventListener("click", () => {
+        if ((state.offset + state.pageSize) < state.total){
+          state.offset = state.offset + state.pageSize
+          runQuery(false)
+        }
+      })
+      el("btnTop").addEventListener("click", () => {
+        state.offset = 0
+        runQuery(false)
+        window.scrollTo({ top: 0, behavior: "smooth" })
+      })
+
+      el("btnExportCsv").addEventListener("click", () => {
+        if (!state.flat.length){
+          setStatus("No data loaded.")
+          return
+        }
+
+        const q = toLower(el("q").value)
+        const mm = el("matchMode").value
+        const brand = el("fBrand").value
+        const engine = el("fEngine").value
+        const ecu = el("fEcu").value
+
+        const filtered = []
+        for (const r of state.flat){
+          if (brand && r.brand !== brand) continue
+          if (engine && r.engine !== engine) continue
+          if (ecu && r.ecu !== ecu) continue
+          if (q){
+            const idh = toLower(r.id)
+            const dh = toLower(r.desc)
+            if (!matchText(idh, q, mm) && !matchText(dh, q, mm)) continue
+          }
+          filtered.push(r)
+        }
+
+        const start = state.total === 0 ? 0 : state.offset
+        const end = Math.min(state.offset + state.pageSize, filtered.length)
+        const pageRows = filtered.slice(start, end)
+
+        const header = ["id","desc","brand","engine_model","ecu_model"].join(",")
+        const lines = pageRows.map(r => [r.id, r.desc, r.brand, r.engine, r.ecu].map(escapeCsv).join(","))
+        downloadText("dtc_page.csv", header + "\n" + lines.join("\n"))
+      })
+
+      window.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")){
+          e.preventDefault()
+          el("q").focus()
+        }
+      })
+
+      const mql = window.matchMedia("(prefers-color-scheme: dark)")
+      const onChange = () => { if (state.themeMode === "auto") applyTheme("auto") }
+      if (mql && mql.addEventListener) mql.addEventListener("change", onChange)
+      else if (mql && mql.addListener) mql.addListener(onChange)
+    }
+
+    loadTheme()
+    bind()
+    resetAll()
+  </script>
+</body>
+</html>

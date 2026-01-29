@@ -193,6 +193,13 @@ export default function App() {
             >
               Game of life
             </button>
+            <button
+              onClick={() => openInNewTab("/tools/dtc_query/index.html")}
+              className="link-button"
+              style={{ width: "100%" }}
+            >
+              🔎 DTC query
+            </button>
           </div>
 
           <div>
