@@ -31,6 +31,7 @@ function usePrefersDark() {
 function openInNewTab(url: string) {
   window.open(url, "_blank", "noopener,noreferrer")
 }
+
 export default function App() {
   const prefersDark = usePrefersDark()
   const [dark, setDark] = useState(prefersDark)
@@ -39,6 +40,7 @@ export default function App() {
   const [loadingBody, setLoadingBody] = useState(false)
   const [selectedPostId, setSelectedPostId] = useState<number | null>(null)
   const [homeContent, setHomeContent] = useState<string>("")
+  const [navOpen, setNavOpen] = useState(true)
 
   useEffect(() => {
     fetch("/main.html")
@@ -63,19 +65,19 @@ export default function App() {
           createdAt?: string
           modifiedAt?: string
         }[]) => {
-          // Sort by createdAt descending (newest first)
           data.sort(
             (a, b) =>
-              new Date(b.createdAt || 0).getTime() -
-              new Date(a.createdAt || 0).getTime()
+              new Date(a.createdAt || 0) < new Date(b.createdAt || 0) ? 1 : -1
           )
-          const postsData = data.map(({ id, title, filename, createdAt, modifiedAt }) => ({
-            id,
-            title,
-            bodyFile: `/posts/${filename}`,
-            createdAt,
-            modifiedAt,
-          }))
+          const postsData = data.map(
+            ({ id, title, filename, createdAt, modifiedAt }) => ({
+              id,
+              title,
+              bodyFile: `/posts/${filename}`,
+              createdAt,
+              modifiedAt,
+            })
+          )
           setPosts(postsData)
           setLoadingPosts(false)
         }
@@ -115,6 +117,9 @@ export default function App() {
         })
       : ""
 
+  const navWidthOpen = 250
+  const navWidthClosed = 56
+
   return (
     <div
       className={dark ? "solarized-dark" : "solarized-light"}
@@ -122,89 +127,113 @@ export default function App() {
     >
       <nav
         style={{
-          width: 250,
-          padding: "1rem",
+          width: navOpen ? navWidthOpen : navWidthClosed,
+          padding: navOpen ? "1rem" : "0.5rem",
           display: "flex",
           flexDirection: "column",
           gap: "1rem",
           flexShrink: 0,
           overflowY: "auto",
+          transition: "width 160ms ease, padding 160ms ease",
+          borderRight: "1px solid var(--base02)",
+          justifyContent: "flex-start",
         }}
       >
-        <div className="presentation">
-          <a
-            href="#"
-            onClick={e => {
-              e.preventDefault()
-              setSelectedPostId(null)
-            }}
-          >
-            <img src={logo} alt="Logo" style={{ width: 200, height: 200 }} />
-          </a>
-          <div className="spacer"></div>
-          <span className="title">autodiag2</span>
-        </div>
-        <div style={{ width: "100%" }}>
-          <h3 style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            Online Tools
-          </h3>
-
-          <button
-            onClick={() => openInNewTab("/tools/password_generator.html")}
-            className="link-button"
-            style={{
-                  width: "100%"
-                }}
-          >
-            🔐 Password Generator
-          </button>
-          <button
-            onClick={() => openInNewTab("/tools/adn/src/index.html")}
-            className="link-button"
-            style={{
-                  width: "100%"
-                }}
-          >
-            Game of life
-          </button>
-        </div>
-        <div>
-          <h3>Posts</h3>
-          {loadingPosts && <p>Loading posts...</p>}
-          {!loadingPosts &&
-            posts.map(({ id, title }) => (
-              <button
-                key={id}
-                onClick={() => setSelectedPostId(id)}
-                className={`post-button${id === selectedPostId ? " selected" : ""}`}
-                style={{
-                  width: "100%"
-                }}
-              >
-                {title}
-              </button>
-            ))}
-        </div>
-        <div
-          className="social-icons"
-          style={{ width: "100%" }}
+        <button
+          onClick={() => setNavOpen(o => !o)}
+          aria-label={navOpen ? "Collapse navigation" : "Expand navigation"}
+          title={navOpen ? "Collapse" : "Expand"}
+          style={{
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: navOpen ? "space-between" : "center",
+            gap: 8,
+          }}
         >
-          <h3>More</h3>
-          <div
-            style={{ display: "flex", gap: "1rem", width: "100%" }}
-          >
-            <a href="https://github.com/autodiag2/">
-              <img src={logo_github} alt="GitHub" style={{ width: 32, height: 32 }} />
+          <span style={{ fontWeight: 600 }}>{navOpen ? "Menu" : "≡"}</span>
+          {navOpen && <span style={{ opacity: 0.8 }}>⟷</span>}
+        </button>
+
+        <div
+          style={{
+            display: navOpen ? "block" : "none",
+          }}
+        >
+          <div className="presentation">
+            <a
+              href="#"
+              onClick={e => {
+                e.preventDefault()
+                setSelectedPostId(null)
+              }}
+            >
+              <img src={logo} alt="Logo" style={{ width: 200, height: 200 }} />
             </a>
+            <div className="spacer"></div>
+            <span className="title">autodiag2</span>
+          </div>
+
+          <div style={{ width: "100%" }}>
+            <h3 style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              Online Tools
+            </h3>
+
+            <button
+              onClick={() => openInNewTab("/tools/password_generator.html")}
+              className="link-button"
+              style={{ width: "100%" }}
+            >
+              🔐 Password Generator
+            </button>
+            <button
+              onClick={() => openInNewTab("/tools/adn/src/index.html")}
+              className="link-button"
+              style={{ width: "100%" }}
+            >
+              Game of life
+            </button>
+          </div>
+
+          <div>
+            <h3>Posts</h3>
+            {loadingPosts && <p>Loading posts...</p>}
+            {!loadingPosts &&
+              posts.map(({ id, title }) => (
+                <button
+                  key={id}
+                  onClick={() => setSelectedPostId(id)}
+                  className={`post-button${
+                    id === selectedPostId ? " selected" : ""
+                  }`}
+                  style={{ width: "100%" }}
+                >
+                  {title}
+                </button>
+              ))}
+          </div>
+
+          <div className="social-icons" style={{ width: "100%" }}>
+            <h3>More</h3>
+            <div style={{ display: "flex", gap: "1rem", width: "100%" }}>
+              <a href="https://github.com/autodiag2/">
+                <img
+                  src={logo_github}
+                  alt="GitHub"
+                  style={{ width: 32, height: 32 }}
+                />
+              </a>
+            </div>
           </div>
         </div>
       </nav>
+
       <main
         style={{
           flexGrow: 1,
           padding: "1rem",
           overflowY: "auto",
-          width: "100%"
+          width: "100%",
         }}
       >
         <button
@@ -230,7 +259,13 @@ export default function App() {
 
         {!loadingBody && selectedPost?.body && (
           <article style={{ marginTop: "1.5rem" }}>
-            <div style={{ fontSize: "0.9rem", marginBottom: "1rem", color: "var(--base01)" }}>
+            <div
+              style={{
+                fontSize: "0.9rem",
+                marginBottom: "1rem",
+                color: "var(--base01)",
+              }}
+            >
               {selectedPost.createdAt && (
                 <div>Created: {formatDate(selectedPost.createdAt)}</div>
               )}
