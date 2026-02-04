@@ -1,13 +1,13 @@
 #!/bin/bash
 
-TOOLS_ROOT="./site/public/tools/"
+TOOLS_ROOT="../site/public/tools/"
 if ! [ -d "$TOOLS_ROOT" ] ; then
-	echo "must be runned as ./adn/install.sh"
+	echo "must be runned as ./install.sh"
 	exit 1
 fi
 DST="$TOOLS_ROOT/adn"
 mkdir -p "$DST"
-SRC="./adn/adn/"
+SRC="./adn/"
 if ! [ -d "$SRC" ] ; then
 	echo "source not found"
 	exit 1
