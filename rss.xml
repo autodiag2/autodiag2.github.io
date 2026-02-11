@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+  xmlns:atom="http://www.w3.org/2005/Atom"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>Posts</title>
+    <link>https://autodiag2.github.io</link>
+    <description>Latest posts</description>
+    <language>en</language>
+    <lastBuildDate>Wed, 11 Feb 2026 11:13:04 GMT</lastBuildDate>
+    <atom:link href="https://autodiag2.github.io/rss.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>autodiag</title>
+      <link>https://autodiag2.github.io/posts/autodiag.html</link>
+      <guid isPermaLink="true">https://autodiag2.github.io/posts/autodiag.html</guid>
+      <pubDate>Wed, 11 Feb 2026 11:12:57 GMT</pubDate>
+      <description>Autodiag is another automotive diagnostic scantool focused on open-source
+    development and protocol experimentation.</description>
+      <content:encoded><![CDATA[<h2>autodiag</h2>
+
+  <p>
+    Autodiag is another automotive diagnostic scantool focused on open-source
+    development and protocol experimentation.
+  </p>
+
+  <p>
+    It targets developers and advanced users who need low-level access to
+    vehicle diagnostic protocols rather than a consumer-oriented interface.
+  </p>
+
+  <p>
+    The project is available on GitHub:
+    <a href="https://github.com/autodiag2/autodiag" target="_blank" rel="noopener">
+      https://github.com/autodiag2/autodiag
+    </a>
+  </p>]]></content:encoded>
+      <enclosure url="cid:b68b229f4aaf87e8717186650df84655630adc9d@autodiag2.github.io" type="text/html" />
+      <source url="https://autodiag2.github.io/rss.xml">Posts</source>
+      <atom:updated>2026-02-11T11:12:57.154Z</atom:updated>
+      <atom:published>2026-02-11T11:12:57.154Z</atom:published>
+    </item>
+    <item>
+      <title>Autodiag database 🚀</title>
+      <link>https://autodiag2.github.io/posts/autodiag_database.html</link>
+      <guid isPermaLink="true">https://autodiag2.github.io/posts/autodiag_database.html</guid>
+      <pubDate>Wed, 11 Feb 2026 11:12:57 GMT</pubDate>
+      <description>Keep track of an up-to-date DTC list, with checking of dups, importing list editing it and more !</description>
+      <content:encoded><![CDATA[<h2>Autodiag database 🚀</h2>
+    <p>
+        Keep track of an up-to-date DTC list, with checking of dups, importing list editing it and more !
+    </p>
+    <div>
+        <h4>Data browser and editor</h4>    
+        <img src="/posts/assets/autodiag_database/browser.png" style="
+            width: 63rem;
+            margin-left: auto;
+            margin-right: auto;
+        ">
+    </div>
+    <div>
+        <h4>Query the database</h4>    
+        <img src="/posts/assets/autodiag_database/query.png" style="
+            width: 63rem;
+            margin-left: auto;
+            margin-right: auto;
+        ">
+    </div>
+    <div>
+        To install check <a href="https://github.com/autodiag2/database/tree/main/manager">manager doc</a>
+    </div>]]></content:encoded>
+      <enclosure url="cid:8f7fe7c62e55704aa7575709993fe4b33f4475bd@autodiag2.github.io" type="text/html" />
+      <source url="https://autodiag2.github.io/rss.xml">Posts</source>
+      <atom:updated>2026-02-11T11:12:57.154Z</atom:updated>
+      <atom:published>2026-02-11T11:12:57.154Z</atom:published>
+    </item>
+    <item>
+      <title>Simulating a car from your Android phone</title>
+      <link>https://autodiag2.github.io/posts/elm327sim_android.html</link>
+      <guid isPermaLink="true">https://autodiag2.github.io/posts/elm327sim_android.html</guid>
+      <pubDate>Wed, 11 Feb 2026 11:12:57 GMT</pubDate>
+      <description>You can simulate a car directly from your Android phone using the
+    ELM327SimAndroid application.</description>
+      <content:encoded><![CDATA[<h2 style="display: flex; align-items: center;">
+    <img src="/posts/assets/elm327sim_android/logo.png" style="width: 5rem;">
+    Simulating a car from your Android phone
+  </h2>
+
+  <p>
+    You can simulate a car directly from your Android phone using the
+    ELM327SimAndroid application.
+  </p>
+
+  <p>
+    Download the application from
+    <a href="https://github.com/autodiag2/ELM327SimAndroid/releases/" target="_blank" rel="noopener">
+      GitHub releases
+    </a>
+    and install it on your device.
+  </p>
+
+  <p>
+    Once installed, start the simulator. The application runs a virtual
+    ELM327 interface on your phone, emulating a vehicle ECU and standard
+    OBD-II responses.
+  </p>
+
+  <p>
+    You can then connect your preferred diagnostic tool to the simulator,
+    exactly as if you were connected to a real car.
+    For example, you can use
+    <a href="https://github.com/fr3ts0n/AndrOBD" target="_blank" rel="noopener">
+      AndrOBD
+    </a>,
+    an Android OBD diagnostic application compatible with ELM327 devices.
+  </p>
+
+  <p>
+    This setup is useful for testing diagnostic applications, developing
+    scantools, or experimenting with OBD-II protocols without requiring
+    physical vehicle hardware.
+  </p>
+
+  <div style="display: flex; flex-direction: column;">
+    <h3>Inspecting the data sent by the scantool to ELM:</h3>
+    <img src="/posts/assets/elm327sim_android/log.png" style="
+        width: 10rem;
+        margin-left: auto;
+        margin-right: auto;
+        box-shadow: 0px 0px 20px 6px;
+    ">
+  </div>
+
+  <div style="display: flex; flex-direction: column;">
+    <h3>Change the adapter emulation kind (Bluetooth, Bluetooth Low Energy, Wifi)</h3>
+    <img src="/posts/assets/elm327sim_android/settings.png" style="
+        width: 10rem;
+        margin-left: auto;
+        margin-right: auto;
+        box-shadow: 0px 0px 20px 6px;
+    ">
+  </div>]]></content:encoded>
+      <enclosure url="cid:a168bce866a7de0df5ddcbb4d5fe41a5b99738c1@autodiag2.github.io" type="text/html" />
+      <source url="https://autodiag2.github.io/rss.xml">Posts</source>
+      <atom:updated>2026-02-11T11:12:57.154Z</atom:updated>
+      <atom:published>2026-02-11T11:12:57.154Z</atom:published>
+    </item>
+  </channel>
+</rss>
