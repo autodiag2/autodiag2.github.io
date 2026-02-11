@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import logo from "./assets/logo.png"
 import logo_github from "./assets/logo_github.png"
-
+import logo_rss from "./assets/rss.svg"
 type Post = {
   id: number
   title: string
@@ -227,6 +227,13 @@ export default function App() {
                 <img
                   src={logo_github}
                   alt="GitHub"
+                  style={{ width: 32, height: 32 }}
+                />
+              </a>
+              <a href="/rss.xml">
+                <img
+                  src={logo_rss}
+                  alt="RSS"
                   style={{ width: 32, height: 32 }}
                 />
               </a>

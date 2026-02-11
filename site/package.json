@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run generate-posts && tsc -b && vite build",
+    "build": "npm run gen:feed && npm run generate-posts && tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "generate-posts": "node scripts/generatePosts.js"
+    "generate-posts": "node scripts/generatePosts.js",
+    "gen:feed": "node scripts/gen-feed.mjs"
   },
   "dependencies": {
     "cheerio": "^1.1.2",
