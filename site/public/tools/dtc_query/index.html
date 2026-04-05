@@ -159,7 +159,7 @@
   <div class="wrap">
     <div class="topbar">
       <div class="brand">
-        <h1>DTC JSON Client</h1>
+        <h1>DTC SQLite Client</h1>
         <div class="sub">
           <span id="sourceInfo">source: <code>not loaded</code></span>
           <span id="dbInfo">entries: <code>0</code></span>
@@ -167,10 +167,8 @@
       </div>
       <div class="actions">
         <button class="btn" id="btnTheme">theme: auto</button>
-        <button class="btn primary" id="btnLoadLatest">load latest dtc.json</button>
-        <button class="btn" id="btnOpenLocal">open local dtc.json</button>
+        <button class="btn primary" id="btnLoadDb">load ad_database.sqlite</button>
         <button class="btn danger" id="btnReset">reset</button>
-        <input id="filePick" type="file" accept=".json,application/json" style="display:none" />
       </div>
     </div>
 
@@ -198,16 +196,12 @@
             <select id="fBrand"><option value="">(any)</option></select>
           </label>
           <label>
-            Engine model
-            <select id="fEngine"><option value="">(any)</option></select>
+            ECU model
+            <select id="fEcu"><option value="">(any)</option></select>
           </label>
         </div>
 
         <div class="row" style="margin-top:10px">
-          <label>
-            ECU model
-            <select id="fEcu"><option value="">(any)</option></select>
-          </label>
           <label>
             Page size
             <select id="pageSize">
@@ -217,6 +211,7 @@
               <option value="250">250</option>
             </select>
           </label>
+          <div></div>
         </div>
 
         <div class="pager">
@@ -233,10 +228,10 @@
       <div class="card">
         <h2>Notes</h2>
         <div class="muted" style="font-size:12px; line-height:1.5">
-          <div>This client expects a hierarchical <span class="mono">dtc.json</span>:</div>
-          <div class="mono" style="margin-top:8px">manufacturer → engine_model → ecu_model → { "P0012": "desc", ... }</div>
+          <div>This client downloads and queries <span class="mono">ad_database.sqlite</span> locally in the browser.</div>
+          <div class="mono" style="margin-top:8px">/tools/dtc_query/ad_database.sqlite</div>
           <div style="margin-top:10px">
-            If the latest release does not ship <span class="mono">dtc.json</span>, generate it and load locally.
+            Search runs on <span class="mono">ad_dtc</span> joined with <span class="mono">ad_ecu</span> and <span class="mono">ad_manufacturer</span>.
           </div>
         </div>
       </div>
@@ -255,14 +250,14 @@
           <thead>
             <tr>
               <th style="width:110px">id</th>
-              <th>desc</th>
+              <th>definition</th>
+              <th>description</th>
               <th style="width:180px">brand</th>
-              <th style="width:200px">engine_model</th>
               <th style="width:200px">ecu_model</th>
             </tr>
           </thead>
           <tbody id="tbody">
-            <tr><td colspan="5" class="muted">Load dtc.json to start.</td></tr>
+            <tr><td colspan="5" class="muted">Load ad_database.sqlite to start.</td></tr>
           </tbody>
         </table>
       </div>
@@ -280,21 +275,21 @@
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
   <script>
-    const GITHUB_LATEST = "https://api.github.com/repos/autodiag2/database/releases/latest"
-    const OWNER = "autodiag2"
-    const REPO = "database"
+    const SQLITE_URL = "/tools/dtc_query/ad_database.sqlite"
 
     const el = (id) => document.getElementById(id)
 
     const state = {
       themeMode: "auto",
-      dataTree: null,
-      flat: [],
+      SQL: null,
+      db: null,
       offset: 0,
       pageSize: 50,
       total: 0,
-      source: null
+      source: null,
+      lastRows: []
     }
 
     const norm = (s) => (s == null ? "" : String(s)).trim()
@@ -349,112 +344,34 @@
       if (keep && [...sel.options].some(o => o.value === prev)) sel.value = prev
     }
 
-    function parseTreeToFlat(tree){
-      const out = []
-      if (!tree || typeof tree !== "object") return out
-
-      for (const brand of Object.keys(tree)){
-        const engines = tree[brand]
-        if (!engines || typeof engines !== "object") continue
-
-        for (const engine of Object.keys(engines)){
-          const ecus = engines[engine]
-          if (!ecus || typeof ecus !== "object") continue
-
-          for (const ecu of Object.keys(ecus)){
-            const codes = ecus[ecu]
-            if (!codes || typeof codes !== "object") continue
-
-            for (const id of Object.keys(codes)){
-              const desc = codes[id]
-              const d = norm(desc)
-              const c = norm(id)
-              if (c.length && d.length){
-                out.push({ id: c, desc: d, brand, engine, ecu })
-              }
-            }
-          }
-        }
-      }
-
-      out.sort((a,b) => (a.id < b.id ? -1 : (b.id < a.id ? 1 : (a.brand < b.brand ? -1 : (b.brand < a.brand ? 1 : 0)))))
-      return out
+    function escapeCsv(s){
+      const v = (s ?? "").toString()
+      if (v.includes('"') || v.includes(",") || v.includes("\n") || v.includes("\r")) return '"' + v.replaceAll('"','""') + '"'
+      return v
     }
 
-    function rebuildFilters(){
-      const tree = state.dataTree
-      const brands = tree ? Object.keys(tree).sort((a,b)=> a < b ? -1 : (b < a ? 1 : 0)) : []
-      fillSelect(el("fBrand"), brands, false)
-      fillSelect(el("fEngine"), [], false)
-      fillSelect(el("fEcu"), [], false)
+    function downloadText(filename, text){
+      const blob = new Blob([text], { type: "text/plain;charset=utf-8" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
     }
 
-    function rebuildDependentFilters(){
-      const tree = state.dataTree
-      const brand = el("fBrand").value
-      const engine = el("fEngine").value
+    function updatePager(){
+      const ps = state.pageSize
+      const start = state.total === 0 ? 0 : state.offset + 1
+      const end = Math.min(state.offset + ps, state.total)
 
-      const engines = (tree && brand && tree[brand] && typeof tree[brand] === "object") ? Object.keys(tree[brand]) : []
-      engines.sort((a,b)=> a < b ? -1 : (b < a ? 1 : 0))
-      fillSelect(el("fEngine"), engines, true)
+      el("matchCount").textContent = String(state.total)
+      el("pageInfo").textContent = state.total === 0 ? "-" : (start + "–" + end)
 
-      const brand2 = el("fBrand").value
-      const engine2 = el("fEngine").value
-
-      const ecus =
-        (tree && brand2 && engine2 && tree[brand2] && tree[brand2][engine2] && typeof tree[brand2][engine2] === "object")
-          ? Object.keys(tree[brand2][engine2])
-          : []
-      ecus.sort((a,b)=> a < b ? -1 : (b < a ? 1 : 0))
-      fillSelect(el("fEcu"), ecus, true)
-    }
-
-    function matchText(hay, needle, mode){
-      if (mode === "exact") return hay === needle
-      if (mode === "prefix") return hay.startsWith(needle)
-      return hay.includes(needle)
-    }
-
-    function runQuery(resetOffset){
-      if (!state.flat.length){
-        setStatus("No data loaded.")
-        return
-      }
-
-      state.pageSize = parseInt(el("pageSize").value, 10) || 50
-      if (resetOffset) state.offset = 0
-
-      const q = toLower(el("q").value)
-      const mm = el("matchMode").value
-      const brand = el("fBrand").value
-      const engine = el("fEngine").value
-      const ecu = el("fEcu").value
-
-      const filtered = []
-      for (const r of state.flat){
-        if (brand && r.brand !== brand) continue
-        if (engine && r.engine !== engine) continue
-        if (ecu && r.ecu !== ecu) continue
-
-        if (q){
-          const idh = toLower(r.id)
-          const dh = toLower(r.desc)
-          if (!matchText(idh, q, mm) && !matchText(dh, q, mm)) continue
-        }
-
-        filtered.push(r)
-      }
-
-      state.total = filtered.length
-
-      const start = state.total === 0 ? 0 : state.offset
-      const end = Math.min(state.offset + state.pageSize, state.total)
-      const pageRows = filtered.slice(start, end)
-
-      renderRows(pageRows)
-      updatePager()
-
-      setStatus("Ready")
+      el("btnPrev").disabled = !(state.offset > 0)
+      el("btnNext").disabled = !((state.offset + ps) < state.total)
     }
 
     function renderRows(rows){
@@ -476,131 +393,234 @@
 
         const tdId = document.createElement("td")
         tdId.className = "id"
-        tdId.textContent = r.id
+        tdId.textContent = norm(r.id)
         tr.appendChild(tdId)
 
+        const tdDef = document.createElement("td")
+        tdDef.textContent = norm(r.definition)
+        tr.appendChild(tdDef)
+
         const tdDesc = document.createElement("td")
-        tdDesc.textContent = r.desc
+        tdDesc.textContent = norm(r.description)
         tr.appendChild(tdDesc)
 
         const tdB = document.createElement("td")
-        tdB.textContent = r.brand
+        tdB.textContent = norm(r.brand)
         tr.appendChild(tdB)
 
-        const tdE = document.createElement("td")
-        tdE.textContent = r.engine
-        tr.appendChild(tdE)
-
         const tdU = document.createElement("td")
-        tdU.textContent = r.ecu
+        tdU.textContent = norm(r.ecu)
         tr.appendChild(tdU)
 
         tb.appendChild(tr)
       }
     }
 
-    function updatePager(){
-      const ps = state.pageSize
-      const start = state.total === 0 ? 0 : (state.offset + 1)
-      const end = Math.min(state.offset + ps, state.total)
-
-      el("matchCount").textContent = String(state.total)
-      el("pageInfo").textContent = state.total === 0 ? "-" : (start + "–" + end)
-
-      el("btnPrev").disabled = !(state.offset > 0)
-      el("btnNext").disabled = !((state.offset + ps) < state.total)
+    function sqlRows(sql, params){
+      const stmt = state.db.prepare(sql)
+      stmt.bind(params)
+      const out = []
+      while (stmt.step()){
+        out.push(stmt.getAsObject())
+      }
+      stmt.free()
+      return out
     }
 
-    function escapeCsv(s){
-      const v = (s ?? "").toString()
-      if (v.includes('"') || v.includes(",") || v.includes("\n") || v.includes("\r")) return '"' + v.replaceAll('"','""') + '"'
-      return v
+    function sqlValue(sql, params){
+      const stmt = state.db.prepare(sql)
+      stmt.bind(params)
+      let out = null
+      if (stmt.step()){
+        const row = stmt.getAsObject()
+        const keys = Object.keys(row)
+        if (keys.length) out = row[keys[0]]
+      }
+      stmt.free()
+      return out
     }
 
-    function downloadText(filename, text){
-      const blob = new Blob([text], { type: "text/plain;charset=utf-8" })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = filename
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      URL.revokeObjectURL(url)
+    function sqlColumn(sql, params){
+      const rows = sqlRows(sql, params)
+      const out = []
+      for (const row of rows){
+        const keys = Object.keys(row)
+        if (!keys.length) continue
+        const v = row[keys[0]]
+        if (v != null && String(v).length) out.push(String(v))
+      }
+      return out
     }
 
-    async function fetchLatestRelease(){
-      const res = await fetch(GITHUB_LATEST, { headers: { "Accept": "application/vnd.github+json" } })
-      if (!res.ok) throw new Error("GitHub API error: " + res.status + " " + res.statusText)
-      return await res.json()
-    }
-
-    async function tryFetchJson(url){
-      const res = await fetch(url, { cache: "no-store" })
-      if (!res.ok) return null
-      const ct = res.headers.get("content-type") || ""
-      if (!ct.includes("json") && !url.toLowerCase().endsWith(".json")) return null
-      return await res.json()
-    }
-
-    async function loadLatestDtcJson(){
-
-      setStatus("Trying dtc.json paths…")
-      u = "/tools/dtc_query/dtc.json"
-      const j = await tryFetchJson(u)
-      if (j){
-        state.source = u
-        await useDtcJson(j, u)
+    function loadFilters(){
+      if (!state.db){
+        fillSelect(el("fBrand"), [], false)
+        fillSelect(el("fEcu"), [], false)
         return
       }
-    
 
-      setSourceInfo("not found")
-      setStatus("dtc.json not found in url; load local file.")
-      throw new Error("dtc.json not found")
+      const brands = sqlColumn(`
+        SELECT DISTINCT m.name
+        FROM ad_manufacturer m
+        INNER JOIN ad_ecu ecu ON ecu.manufacturer_id = m.id
+        INNER JOIN ad_dtc d ON d.ecu_id = ecu.id
+        WHERE m.name IS NOT NULL AND m.name <> ''
+        ORDER BY m.name
+      `, [])
+
+      const ecus = sqlColumn(`
+        SELECT DISTINCT ecu.model
+        FROM ad_ecu ecu
+        INNER JOIN ad_dtc d ON d.ecu_id = ecu.id
+        WHERE ecu.model IS NOT NULL AND ecu.model <> ''
+        ORDER BY ecu.model
+      `, [])
+
+      fillSelect(el("fBrand"), brands, false)
+      fillSelect(el("fEcu"), ecus, false)
     }
 
-    async function useDtcJson(j, sourceLabel){
-      if (!j || typeof j !== "object"){
-        throw new Error("Invalid dtc.json (expected object).")
+    function updateDbCount(){
+      if (!state.db){
+        setDbInfo(0)
+        return
+      }
+      const n = sqlValue("SELECT COUNT(*) AS n FROM ad_dtc", [])
+      setDbInfo(Number(n || 0))
+    }
+
+    async function loadSqlite(){
+      setStatus("Loading sqlite engine…")
+
+      if (state.SQL == null){
+        state.SQL = await initSqlJs({
+          locateFile: (file) => "https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/" + file
+        })
       }
 
-      setStatus("Indexing…")
-      state.dataTree = j
-      state.flat = parseTreeToFlat(j)
-      setDbInfo(state.flat.length)
-      rebuildFilters()
-      rebuildDependentFilters()
+      setStatus("Downloading ad_database.sqlite…")
+      const res = await fetch(SQLITE_URL, { cache: "no-store" })
+      if (!res.ok) throw new Error("failed to download ad_database.sqlite")
+
+      const buf = await res.arrayBuffer()
+
+      if (state.db != null){
+        state.db.close()
+        state.db = null
+      }
+
+      state.db = new state.SQL.Database(new Uint8Array(buf))
+      state.source = SQLITE_URL
       state.offset = 0
-      runQuery(true)
-      setSourceInfo(sourceLabel ? sourceLabel : "loaded")
+      state.lastRows = []
+
+      setSourceInfo(SQLITE_URL)
+      loadFilters()
+      updateDbCount()
+      await runQuery(true)
       setStatus("Ready")
     }
 
-    async function openLocal(file){
-      setStatus("Reading local file…")
-      const buf = await file.arrayBuffer()
-      const txt = new TextDecoder("utf-8").decode(buf)
-      const j = JSON.parse(txt)
-      await useDtcJson(j, "local:" + file.name)
+    async function runQuery(resetOffset){
+      if (!state.db){
+        setStatus("No sqlite loaded.")
+        return
+      }
+
+      state.pageSize = parseInt(el("pageSize").value, 10) || 50
+      if (resetOffset) state.offset = 0
+
+      const q = toLower(el("q").value)
+      const mm = el("matchMode").value
+      const brand = el("fBrand").value
+      const ecu = el("fEcu").value
+
+      let pattern = ""
+      if (q){
+        if (mm === "exact") pattern = q
+        else if (mm === "prefix") pattern = q + "%"
+        else pattern = "%" + q + "%"
+      }
+
+      const where = []
+      const params = []
+
+      if (brand){
+        where.push("m.name = ?")
+        params.push(brand)
+      }
+
+      if (ecu){
+        where.push("ecu.model = ?")
+        params.push(ecu)
+      }
+
+      if (q){
+        if (mm === "exact"){
+          where.push("(LOWER(COALESCE(d.code, '')) = ? OR LOWER(COALESCE(d.definition, '')) = ? OR LOWER(COALESCE(d.description, '')) = ?)")
+          params.push(pattern, pattern, pattern)
+        } else {
+          where.push("(LOWER(COALESCE(d.code, '')) LIKE ? OR LOWER(COALESCE(d.definition, '')) LIKE ? OR LOWER(COALESCE(d.description, '')) LIKE ?)")
+          params.push(pattern, pattern, pattern)
+        }
+      }
+
+      const whereSql = where.length ? ("WHERE " + where.join(" AND ")) : ""
+
+      const fromSql = `
+        FROM ad_dtc d
+        INNER JOIN ad_ecu ecu ON ecu.id = d.ecu_id
+        LEFT JOIN ad_manufacturer m ON m.id = ecu.manufacturer_id
+      `
+
+      const countSql = `
+        SELECT COUNT(*) AS total
+        ${fromSql}
+        ${whereSql}
+      `
+
+      const rowsSql = `
+        SELECT
+          d.code AS id,
+          d.definition AS definition,
+          d.description AS description,
+          COALESCE(m.name, '') AS brand,
+          COALESCE(ecu.model, '') AS ecu
+        ${fromSql}
+        ${whereSql}
+        ORDER BY d.code, brand, ecu
+        LIMIT ? OFFSET ?
+      `
+
+      setStatus("Querying sqlite…")
+
+      state.total = Number(sqlValue(countSql, params) || 0)
+      state.lastRows = sqlRows(rowsSql, [...params, state.pageSize, state.offset])
+
+      renderRows(state.lastRows)
+      updatePager()
+      setStatus("Ready")
     }
 
     function resetAll(){
-      state.dataTree = null
-      state.flat = []
+      if (state.db != null){
+        state.db.close()
+        state.db = null
+      }
+
       state.offset = 0
       state.pageSize = 50
       state.total = 0
       state.source = null
+      state.lastRows = []
 
       el("q").value = ""
       el("matchMode").value = "contains"
       el("pageSize").value = "50"
       fillSelect(el("fBrand"), [], false)
-      fillSelect(el("fEngine"), [], false)
       fillSelect(el("fEcu"), [], false)
 
-      el("tbody").innerHTML = "<tr><td colspan='5' class='muted'>Load dtc.json to start.</td></tr>"
+      el("tbody").innerHTML = "<tr><td colspan='5' class='muted'>Load ad_database.sqlite to start.</td></tr>"
       el("matchCount").textContent = "0"
       el("pageInfo").textContent = "-"
       setSourceInfo("not loaded")
@@ -611,23 +631,11 @@
     function bind(){
       el("btnTheme").addEventListener("click", toggleTheme)
 
-      el("btnLoadLatest").addEventListener("click", async () => {
+      el("btnLoadDb").addEventListener("click", async () => {
         try{
-          await loadLatestDtcJson()
+          await loadSqlite()
         } catch (e){
           setStatus(String(e && e.message ? e.message : e))
-        }
-      })
-
-      el("btnOpenLocal").addEventListener("click", () => el("filePick").click())
-      el("filePick").addEventListener("change", async (e) => {
-        const f = e.target.files && e.target.files[0]
-        e.target.value = ""
-        if (!f) return
-        try{
-          await openLocal(f)
-        } catch (err){
-          setStatus(String(err && err.message ? err.message : err))
         }
       })
 
@@ -636,14 +644,7 @@
       el("btnSearch").addEventListener("click", () => runQuery(true))
       el("q").addEventListener("keydown", (e) => { if (e.key === "Enter") runQuery(true) })
 
-      el("fBrand").addEventListener("change", () => {
-        rebuildDependentFilters()
-        runQuery(true)
-      })
-      el("fEngine").addEventListener("change", () => {
-        rebuildDependentFilters()
-        runQuery(true)
-      })
+      el("fBrand").addEventListener("change", () => runQuery(true))
       el("fEcu").addEventListener("change", () => runQuery(true))
       el("matchMode").addEventListener("change", () => runQuery(true))
       el("pageSize").addEventListener("change", () => runQuery(true))
@@ -652,12 +653,14 @@
         state.offset = Math.max(0, state.offset - state.pageSize)
         runQuery(false)
       })
+
       el("btnNext").addEventListener("click", () => {
         if ((state.offset + state.pageSize) < state.total){
           state.offset = state.offset + state.pageSize
           runQuery(false)
         }
       })
+
       el("btnTop").addEventListener("click", () => {
         state.offset = 0
         runQuery(false)
@@ -665,36 +668,15 @@
       })
 
       el("btnExportCsv").addEventListener("click", () => {
-        if (!state.flat.length){
-          setStatus("No data loaded.")
+        if (!state.lastRows.length){
+          setStatus("No rows to export.")
           return
         }
 
-        const q = toLower(el("q").value)
-        const mm = el("matchMode").value
-        const brand = el("fBrand").value
-        const engine = el("fEngine").value
-        const ecu = el("fEcu").value
-
-        const filtered = []
-        for (const r of state.flat){
-          if (brand && r.brand !== brand) continue
-          if (engine && r.engine !== engine) continue
-          if (ecu && r.ecu !== ecu) continue
-          if (q){
-            const idh = toLower(r.id)
-            const dh = toLower(r.desc)
-            if (!matchText(idh, q, mm) && !matchText(dh, q, mm)) continue
-          }
-          filtered.push(r)
-        }
-
-        const start = state.total === 0 ? 0 : state.offset
-        const end = Math.min(state.offset + state.pageSize, filtered.length)
-        const pageRows = filtered.slice(start, end)
-
-        const header = ["id","desc","brand","engine_model","ecu_model"].join(",")
-        const lines = pageRows.map(r => [r.id, r.desc, r.brand, r.engine, r.ecu].map(escapeCsv).join(","))
+        const header = ["id","definition","description","brand","ecu_model"].join(",")
+        const lines = state.lastRows.map(r =>
+          [r.id, r.definition, r.description, r.brand, r.ecu].map(escapeCsv).join(",")
+        )
         downloadText("dtc_page.csv", header + "\n" + lines.join("\n"))
       })
 
