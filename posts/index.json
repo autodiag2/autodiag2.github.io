@@ -1,12 +1,5 @@
 [
   {
-    "id": 5,
-    "title": "Simple test",
-    "filename": "test.html",
-    "publishedAt": "2026-04-05T17:28:00.000Z",
-    "updatedAt": "2026-04-05T17:28:00.000Z"
-  },
-  {
     "id": 1,
     "title": "autodiag",
     "filename": "autodiag.html",
