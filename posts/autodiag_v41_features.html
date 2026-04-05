@@ -1,0 +1,21 @@
+<article>
+    <h2>Autodiag v41</h2>
+    <p>
+        Thanks to signals, an abstraction layer over the diagnostic data, anything built ontop of libautodiag has
+        capabilities to send, generate and receive signal below is an example use case with sim generator gui.
+    </p>
+    <img src="/posts/assets/autodiag_v41_features/signals.png" style="
+        width: 63rem;
+        margin-left: auto;
+        margin-right: auto;
+    " />
+    Launched with:
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism.css">
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-bash.min.js"></script>
+
+    <pre><code class="language-bash">
+        ./output/bin/elm327sim -g gui
+        ./output/bin/autodiag gui -n /dev/ttys001
+    </code></pre>
+</article>
