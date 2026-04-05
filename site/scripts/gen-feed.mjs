@@ -1,7 +1,6 @@
 import fs from "fs"
 import path from "path"
 import * as cheerio from "cheerio"
-import { createHash } from "crypto"
 
 const siteUrl = process.env.SITE_URL || "https://autodiag2.github.io"
 const feedTitle = process.env.FEED_TITLE || "Posts"
@@ -28,7 +27,19 @@ const absUrl = p => {
   return `${base}/${rel}`
 }
 
-const pickText = ($, sel) => ($(sel).first().text() || "").trim()
+const pickText = (root, sel) => (root.find(sel).first().text() || "").trim()
+
+const textOrNull = v => {
+  const s = String(v || "").trim()
+  return s.length ? s : null
+}
+
+const isoOrNull = v => {
+  const s = textOrNull(v)
+  if (!s) return null
+  const d = new Date(s)
+  return Number.isNaN(d.getTime()) ? null : d.toISOString()
+}
 
 const posts = files
   .map((file, i) => {
@@ -37,30 +48,41 @@ const posts = files
     const stats = fs.statSync(filePath)
     const $ = cheerio.load(content)
 
+    const article = $("article").first()
+    const root = article.length ? article : $.root()
+
     const title =
-      pickText($, "h2") ||
-      pickText($, "h1") ||
-      pickText($, "title") ||
+      pickText(root, "h2") ||
+      pickText(root, "h1") ||
+      $("title").first().text().trim() ||
       file.replace(/\.html$/i, "")
 
     const desc =
       $('meta[name="description"]').attr("content")?.trim() ||
-      pickText($, "p") ||
+      pickText(root, "p") ||
       ""
 
-    const createdAt = stats.birthtime?.toISOString?.() || stats.mtime.toISOString()
-    const modifiedAt = stats.mtime.toISOString()
+    const times = article.find("time")
+    const publishedAt =
+      isoOrNull(times.first().attr("datetime")) ||
+      stats.birthtime?.toISOString?.() ||
+      stats.mtime.toISOString()
+
+    const updatedAt =
+      isoOrNull(article.find("time.updated").first().attr("datetime")) ||
+      isoOrNull(times.eq(1).attr("datetime")) ||
+      stats.mtime.toISOString()
 
     return {
       id: i + 1,
       title,
       filename: file,
-      createdAt,
-      modifiedAt,
-      description: desc,
+      publishedAt,
+      updatedAt,
+      description: desc
     }
   })
-  .sort((a, b) => (a.modifiedAt < b.modifiedAt ? 1 : a.modifiedAt > b.modifiedAt ? -1 : 0))
+  .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
 
 fs.writeFileSync(
   outJson,
@@ -76,15 +98,12 @@ const itemsXml = posts
   .map(p => {
     const link = absUrl(`/posts/${p.filename}`)
     const guid = link
-    const pubDate = new Date(p.modifiedAt).toUTCString()
-    const createdIso = p.createdAt
+    const pubDate = new Date(p.publishedAt).toUTCString()
     const filePath = path.join(postsDir, p.filename)
     const html = fs.readFileSync(filePath, "utf8")
     const $ = cheerio.load(html)
     const contentHtml = ($("article").first().html() || $("body").first().html() || "").trim()
-    const contentEsc = esc(contentHtml)
     const desc = p.description ? esc(p.description) : ""
-    const cid = createHash("sha1").update(link).digest("hex") + "@autodiag2.github.io"
 
     return `    <item>
       <title>${esc(p.title)}</title>
@@ -93,10 +112,9 @@ const itemsXml = posts
       <pubDate>${esc(pubDate)}</pubDate>
       <description>${desc}</description>
       <content:encoded><![CDATA[${contentHtml}]]></content:encoded>
-      <enclosure url="cid:${cid}" type="text/html" />
       <source url="${esc(absUrl(feedPath))}">${esc(feedTitle)}</source>
-      <atom:updated>${esc(new Date(p.modifiedAt).toISOString())}</atom:updated>
-      <atom:published>${esc(createdIso)}</atom:published>
+      <atom:updated>${esc(new Date(p.updatedAt).toISOString())}</atom:updated>
+      <atom:published>${esc(new Date(p.publishedAt).toISOString())}</atom:published>
     </item>`
   })
   .join("\n")

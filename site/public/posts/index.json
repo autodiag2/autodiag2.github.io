@@ -1,30 +1,30 @@
 [
   {
-    "id": 3,
-    "title": "Autodiag v41",
-    "filename": "autodiag_v41_features.html",
-    "createdAt": "2026-04-05T14:46:06.246Z",
-    "modifiedAt": "2026-04-05T14:58:40.066Z"
+    "id": 1,
+    "title": "autodiag",
+    "filename": "autodiag.html",
+    "publishedAt": "2026-04-05T14:55:00.000Z",
+    "updatedAt": "2026-04-05T15:20:00.000Z"
   },
   {
     "id": 2,
     "title": "Autodiag database 🚀",
     "filename": "autodiag_database.html",
-    "createdAt": "2026-03-06T12:44:40.821Z",
-    "modifiedAt": "2026-03-06T12:44:40.822Z"
+    "publishedAt": "2026-04-05T14:55:00.000Z",
+    "updatedAt": "2026-04-05T15:20:00.000Z"
+  },
+  {
+    "id": 3,
+    "title": "Autodiag v41",
+    "filename": "autodiag_v41_features.html",
+    "publishedAt": "2026-04-05T14:55:00.000Z",
+    "updatedAt": "2026-04-05T15:20:00.000Z"
   },
   {
     "id": 4,
     "title": "Simulating a car from your Android phone",
     "filename": "elm327sim_android.html",
-    "createdAt": "2026-03-06T12:44:40.822Z",
-    "modifiedAt": "2026-03-06T12:44:40.822Z"
-  },
-  {
-    "id": 1,
-    "title": "autodiag",
-    "filename": "autodiag.html",
-    "createdAt": "2026-03-06T12:44:40.821Z",
-    "modifiedAt": "2026-03-06T12:44:40.821Z"
+    "publishedAt": "2026-04-05T14:55:00.000Z",
+    "updatedAt": "2026-04-05T15:20:00.000Z"
   }
 ]
