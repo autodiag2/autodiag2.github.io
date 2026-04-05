@@ -7,8 +7,24 @@
     <link>https://autodiag2.github.io</link>
     <description>Latest posts</description>
     <language>en</language>
-    <lastBuildDate>Sun, 05 Apr 2026 15:28:00 GMT</lastBuildDate>
+    <lastBuildDate>Sun, 05 Apr 2026 15:29:56 GMT</lastBuildDate>
     <atom:link href="https://autodiag2.github.io/rss.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Simple test</title>
+      <link>https://autodiag2.github.io/posts/test.html</link>
+      <guid isPermaLink="true">https://autodiag2.github.io/posts/test.html</guid>
+      <pubDate>Sun, 05 Apr 2026 17:28:00 GMT</pubDate>
+      <description>April 5, 2026</description>
+      <content:encoded><![CDATA[<p style="margin-top: -0.5rem; opacity: 0.7; font-size: 0.95rem;">
+        <time datetime="2026-04-05T17:28:00Z">April 5, 2026</time>
+    </p>
+    <time class="updated" datetime="2026-04-05T17:28:00Z">Updated April 5, 2026</time>
+
+    <h2>Simple test</h2>]]></content:encoded>
+      <source url="https://autodiag2.github.io/rss.xml">Posts</source>
+      <atom:updated>2026-04-05T17:28:00.000Z</atom:updated>
+      <atom:published>2026-04-05T17:28:00.000Z</atom:published>
+    </item>
     <item>
       <title>autodiag</title>
       <link>https://autodiag2.github.io/posts/autodiag.html</link>
