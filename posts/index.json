@@ -3,28 +3,28 @@
     "id": 1,
     "title": "autodiag",
     "filename": "autodiag.html",
-    "createdAt": "2026-04-05T15:02:40.114Z",
-    "modifiedAt": "2026-04-05T15:02:40.114Z"
+    "publishedAt": "2026-04-05T14:55:00.000Z",
+    "updatedAt": "2026-04-05T15:20:00.000Z"
   },
   {
     "id": 2,
     "title": "Autodiag database 🚀",
     "filename": "autodiag_database.html",
-    "createdAt": "2026-04-05T15:02:40.114Z",
-    "modifiedAt": "2026-04-05T15:02:40.114Z"
+    "publishedAt": "2026-04-05T14:55:00.000Z",
+    "updatedAt": "2026-04-05T15:20:00.000Z"
   },
   {
     "id": 3,
     "title": "Autodiag v41",
     "filename": "autodiag_v41_features.html",
-    "createdAt": "2026-04-05T15:02:40.114Z",
-    "modifiedAt": "2026-04-05T15:02:40.114Z"
+    "publishedAt": "2026-04-05T14:55:00.000Z",
+    "updatedAt": "2026-04-05T15:20:00.000Z"
   },
   {
     "id": 4,
-    "title": "\n    \n    Simulating a car from your Android phone\n  ",
+    "title": "Simulating a car from your Android phone",
     "filename": "elm327sim_android.html",
-    "createdAt": "2026-04-05T15:02:40.114Z",
-    "modifiedAt": "2026-04-05T15:02:40.114Z"
+    "publishedAt": "2026-04-05T14:55:00.000Z",
+    "updatedAt": "2026-04-05T15:20:00.000Z"
   }
 ]

@@ -7,16 +7,19 @@
     <link>https://autodiag2.github.io</link>
     <description>Latest posts</description>
     <language>en</language>
-    <lastBuildDate>Sun, 05 Apr 2026 15:02:44 GMT</lastBuildDate>
+    <lastBuildDate>Sun, 05 Apr 2026 15:28:00 GMT</lastBuildDate>
     <atom:link href="https://autodiag2.github.io/rss.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>autodiag</title>
       <link>https://autodiag2.github.io/posts/autodiag.html</link>
       <guid isPermaLink="true">https://autodiag2.github.io/posts/autodiag.html</guid>
-      <pubDate>Sun, 05 Apr 2026 15:02:40 GMT</pubDate>
-      <description>Autodiag is another automotive diagnostic scantool focused on open-source
-    development and protocol experimentation.</description>
-      <content:encoded><![CDATA[<h2>autodiag</h2>
+      <pubDate>Sun, 05 Apr 2026 14:55:00 GMT</pubDate>
+      <description>April 5, 2026</description>
+      <content:encoded><![CDATA[<p style="margin-top: -0.5rem; opacity: 0.7; font-size: 0.95rem;">
+    <time datetime="2026-04-05T14:55:00Z">April 5, 2026</time>
+  </p>
+  <time class="updated" datetime="2026-04-05T15:20:00Z">Updated April 5, 2026</time>
+  <h2>autodiag</h2>
 
   <p>
     Autodiag is another automotive diagnostic scantool focused on open-source
@@ -34,18 +37,21 @@
       https://github.com/autodiag2/autodiag
     </a>
   </p>]]></content:encoded>
-      <enclosure url="cid:b68b229f4aaf87e8717186650df84655630adc9d@autodiag2.github.io" type="text/html" />
       <source url="https://autodiag2.github.io/rss.xml">Posts</source>
-      <atom:updated>2026-04-05T15:02:40.114Z</atom:updated>
-      <atom:published>2026-04-05T15:02:40.114Z</atom:published>
+      <atom:updated>2026-04-05T15:20:00.000Z</atom:updated>
+      <atom:published>2026-04-05T14:55:00.000Z</atom:published>
     </item>
     <item>
       <title>Autodiag database 🚀</title>
       <link>https://autodiag2.github.io/posts/autodiag_database.html</link>
       <guid isPermaLink="true">https://autodiag2.github.io/posts/autodiag_database.html</guid>
-      <pubDate>Sun, 05 Apr 2026 15:02:40 GMT</pubDate>
-      <description>Keep track of an up-to-date DTC list, with checking of dups, importing list editing it and more !</description>
-      <content:encoded><![CDATA[<h2>Autodiag database 🚀</h2>
+      <pubDate>Sun, 05 Apr 2026 14:55:00 GMT</pubDate>
+      <description>April 5, 2026</description>
+      <content:encoded><![CDATA[<p style="margin-top: -0.5rem; opacity: 0.7; font-size: 0.95rem;">
+        <time datetime="2026-04-05T14:55:00Z">April 5, 2026</time>
+    </p>
+    <time class="updated" datetime="2026-04-05T15:20:00Z">Updated April 5, 2026</time>
+    <h2>Autodiag database 🚀</h2>
     <p>
         Keep track of an up-to-date DTC list, with checking of dups, importing list editing it and more !
     </p>
@@ -68,19 +74,21 @@
     <div>
         To install check <a href="https://github.com/autodiag2/database/tree/main/manager">manager doc</a>
     </div>]]></content:encoded>
-      <enclosure url="cid:8f7fe7c62e55704aa7575709993fe4b33f4475bd@autodiag2.github.io" type="text/html" />
       <source url="https://autodiag2.github.io/rss.xml">Posts</source>
-      <atom:updated>2026-04-05T15:02:40.114Z</atom:updated>
-      <atom:published>2026-04-05T15:02:40.114Z</atom:published>
+      <atom:updated>2026-04-05T15:20:00.000Z</atom:updated>
+      <atom:published>2026-04-05T14:55:00.000Z</atom:published>
     </item>
     <item>
       <title>Autodiag v41</title>
       <link>https://autodiag2.github.io/posts/autodiag_v41_features.html</link>
       <guid isPermaLink="true">https://autodiag2.github.io/posts/autodiag_v41_features.html</guid>
-      <pubDate>Sun, 05 Apr 2026 15:02:40 GMT</pubDate>
-      <description>Thanks to signals, an abstraction layer over the diagnostic data, anything built ontop of libautodiag has
-        capabilities to send, generate and receive signal below is an example use case with sim generator gui.</description>
-      <content:encoded><![CDATA[<h2>Autodiag v41</h2>
+      <pubDate>Sun, 05 Apr 2026 14:55:00 GMT</pubDate>
+      <description>April 5, 2026</description>
+      <content:encoded><![CDATA[<p style="margin-top: -0.5rem; opacity: 0.7; font-size: 0.95rem;">
+        <time datetime="2026-04-05T14:55:00Z">April 5, 2026</time>
+    </p>
+    <time class="updated" datetime="2026-04-05T15:20:00Z">Updated April 5, 2026</time>
+    <h2>Autodiag v41</h2>
     <p>
         Thanks to signals, an abstraction layer over the diagnostic data, anything built ontop of libautodiag has
         capabilities to send, generate and receive signal below is an example use case with sim generator gui.
@@ -102,19 +110,21 @@
 
     This will allow to feed the lib with time series,
     improve the android app and maybe in the future support CAN signals with DBC format.]]></content:encoded>
-      <enclosure url="cid:996a7e38b8e7b183a62d7ed45649a25ffb96684f@autodiag2.github.io" type="text/html" />
       <source url="https://autodiag2.github.io/rss.xml">Posts</source>
-      <atom:updated>2026-04-05T15:02:40.114Z</atom:updated>
-      <atom:published>2026-04-05T15:02:40.114Z</atom:published>
+      <atom:updated>2026-04-05T15:20:00.000Z</atom:updated>
+      <atom:published>2026-04-05T14:55:00.000Z</atom:published>
     </item>
     <item>
       <title>Simulating a car from your Android phone</title>
       <link>https://autodiag2.github.io/posts/elm327sim_android.html</link>
       <guid isPermaLink="true">https://autodiag2.github.io/posts/elm327sim_android.html</guid>
-      <pubDate>Sun, 05 Apr 2026 15:02:40 GMT</pubDate>
-      <description>You can simulate a car directly from your Android phone using the
-    ELM327SimAndroid application.</description>
-      <content:encoded><![CDATA[<h2 style="display: flex; align-items: center;">
+      <pubDate>Sun, 05 Apr 2026 14:55:00 GMT</pubDate>
+      <description>April 5, 2026</description>
+      <content:encoded><![CDATA[<p style="margin-top: -0.5rem; opacity: 0.7; font-size: 0.95rem;">
+    <time datetime="2026-04-05T14:55:00Z">April 5, 2026</time>
+  </p>
+  <time class="updated" datetime="2026-04-05T15:20:00Z">Updated April 5, 2026</time>
+  <h2 style="display: flex; align-items: center;">
     <img src="/posts/assets/elm327sim_android/logo.png" style="width: 5rem;">
     Simulating a car from your Android phone
   </h2>
@@ -173,10 +183,9 @@
         box-shadow: 0px 0px 20px 6px;
     ">
   </div>]]></content:encoded>
-      <enclosure url="cid:a168bce866a7de0df5ddcbb4d5fe41a5b99738c1@autodiag2.github.io" type="text/html" />
       <source url="https://autodiag2.github.io/rss.xml">Posts</source>
-      <atom:updated>2026-04-05T15:02:40.114Z</atom:updated>
-      <atom:published>2026-04-05T15:02:40.114Z</atom:published>
+      <atom:updated>2026-04-05T15:20:00.000Z</atom:updated>
+      <atom:published>2026-04-05T14:55:00.000Z</atom:published>
     </item>
   </channel>
 </rss>
