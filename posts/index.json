@@ -1,5 +1,12 @@
 [
   {
+    "id": 6,
+    "title": "Test scantool app on the same phone as the emulator is runnig",
+    "filename": "elm327simandroid_split_screen.html",
+    "publishedAt": "2026-07-05T13:42:00.000Z",
+    "updatedAt": "2026-07-05T13:42:00.000Z"
+  },
+  {
     "id": 5,
     "title": "Enhance simulating accuracy with lua",
     "filename": "elm327sim_android2.html",
