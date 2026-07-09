@@ -1,6 +1,3 @@
 [submodule "adn/adn"]
 	path = adn/adn
 	url = https://github.com/autodiag2/adn
-[submodule "autodiag-database/database"]
-	path = autodiag-database/database
-	url = https://github.com/autodiag2/database
