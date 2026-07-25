@@ -152,6 +152,72 @@
     .id{font-family:var(--mono); color:var(--cyan); font-weight:600; white-space:nowrap}
     .muted{color:var(--muted)}
     .pager{margin-top:10px; display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap}
+    .modal.hidden{
+      display:none;
+    }
+
+    .modal{
+      position:fixed;
+      inset:0;
+      z-index:1000;
+    }
+
+    .modal-backdrop{
+      position:absolute;
+      inset:0;
+      background:rgba(0,0,0,.45);
+      backdrop-filter:blur(4px);
+    }
+
+    .modal-window{
+      position:relative;
+      width:min(900px,95vw);
+      max-height:90vh;
+      overflow:auto;
+      margin:4vh auto;
+      background:linear-gradient(180deg,var(--panel),var(--panel2));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+
+    .modal-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:14px;
+      border-bottom:1px solid var(--line);
+      position:sticky;
+      top:0;
+      background:inherit;
+    }
+
+    .modal-body{
+      padding:14px;
+    }
+
+    .modal-section{
+      margin-bottom:20px;
+    }
+
+    .detail-table{
+      width:100%;
+      border-collapse:collapse;
+    }
+
+    .detail-table td{
+      padding:8px;
+      border-bottom:1px solid var(--line);
+    }
+
+    .detail-table td:first-child{
+      width:220px;
+      color:var(--muted);
+      font-weight:600;
+    }
+    tbody tr {
+      cursor: pointer;
+    }
   </style>
 </head>
 
@@ -275,6 +341,45 @@
     </div>
   </div>
 
+  <div id="dtcModal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+
+    <div class="modal-window">
+      <div class="modal-header">
+        <h2 id="modalTitle">DTC</h2>
+        <button id="modalClose" class="btn">✕</button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="modal-section">
+          <h3>General</h3>
+          <table class="detail-table">
+            <tbody id="modalGeneral"></tbody>
+          </table>
+        </div>
+
+        <div class="modal-section">
+          <h3>Classification</h3>
+          <table class="detail-table">
+            <tbody id="modalClassification"></tbody>
+          </table>
+        </div>
+
+        <div class="modal-section">
+          <h3>Related DTC</h3>
+          <ul id="modalRelated"></ul>
+        </div>
+
+        <div class="modal-section">
+          <h3>Evidence</h3>
+          <ul id="modalEvidence"></ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.3/sql-wasm.js"></script>
   <script>
     const SQLITE_URL = "/tools/dtc_query/ad_database.sqlite"
@@ -390,7 +495,9 @@
 
       for (const r of rows){
         const tr = document.createElement("tr")
-
+        tr.addEventListener("click", () => {
+          openDtcModal(r.id, r.ecu)
+        })
         const tdId = document.createElement("td")
         tdId.className = "id"
         tdId.textContent = norm(r.id)
@@ -696,6 +803,163 @@
     loadTheme()
     bind()
     resetAll()
+
+    function openDtcModal(code, ecuModel){
+      const sql = `
+        SELECT
+
+        d.id,
+        d.code,
+        d.definition,
+        d.description,
+        d.mil,
+        d.detection_condition,
+        d.causes,
+        d.repairs,
+        d.created,
+        d.updated,
+
+        ecu.model AS ecu,
+        ecu.type AS ecu_type,
+
+        m.name AS manufacturer,
+
+        group_concat(distinct std.name) AS standards,
+        group_concat(distinct proto.name) AS protocols,
+        group_concat(distinct sys.name) AS systems,
+        group_concat(distinct sub.name) AS subsystems,
+        group_concat(distinct cat.name) AS categories,
+        group_concat(distinct sev.name) AS severities,
+
+        group_concat(distinct rel.code) AS related,
+
+        group_concat(distinct ev.text) AS evidence
+
+        FROM ad_dtc d
+
+        JOIN ad_ecu ecu
+        ON ecu.id=d.ecu_id
+
+        LEFT JOIN ad_manufacturer m
+        ON m.id=ecu.manufacturer_id
+
+        LEFT JOIN ad_dtc_standard_link sl
+        ON sl.dtc_id=d.id
+        LEFT JOIN ad_dtc_standard std
+        ON std.id=sl.standard_id
+
+        LEFT JOIN ad_dtc_protocol_link pl
+        ON pl.dtc_id=d.id
+        LEFT JOIN ad_diag_protocol proto
+        ON proto.id=pl.protocol_id
+
+        LEFT JOIN ad_dtc_system_link syl
+        ON syl.dtc_id=d.id
+        LEFT JOIN ad_dtc_system sys
+        ON sys.id=syl.system_id
+
+        LEFT JOIN ad_dtc_subsystem_link ssl
+        ON ssl.dtc_id=d.id
+        LEFT JOIN ad_dtc_subsystem sub
+        ON sub.id=ssl.subsystem_id
+
+        LEFT JOIN ad_dtc_category_link cl
+        ON cl.dtc_id=d.id
+        LEFT JOIN ad_dtc_category cat
+        ON cat.id=cl.category_id
+
+        LEFT JOIN ad_dtc_severity_link svl
+        ON svl.dtc_id=d.id
+        LEFT JOIN ad_dtc_severity sev
+        ON sev.id=svl.severity_id
+
+        LEFT JOIN ad_dtc_related dr
+        ON dr.dtc_id=d.id
+        LEFT JOIN ad_dtc rel
+        ON rel.id=dr.related_dtc_id
+
+        LEFT JOIN ad_dtc_evidence de
+        ON de.dtc_id=d.id
+        LEFT JOIN ad_evidence ev
+        ON ev.id=de.evidence_id
+
+        WHERE d.code=?
+        AND ecu.model=?
+
+        GROUP BY d.id
+      `;
+
+      const row = sqlRows(sql,[code,ecuModel])[0];
+
+      if(!row)
+          return;
+
+      el("modalTitle").textContent=row.code;
+      function formatTimestamp(ts){
+        ts = Number(ts);
+
+        if (!Number.isFinite(ts) || ts <= 0)
+            return "";
+
+        return new Date(ts).toLocaleString();
+      }
+      const general=[
+          ["Definition",row.definition],
+          ["Description",row.description],
+          ["Manufacturer",row.manufacturer],
+          ["ECU",row.ecu],
+          ["ECU type",row.ecu_type],
+          ["MIL",row.mil ? "Yes":"No"],
+          ["Detection condition",row.detection_condition],
+          ["Causes",row.causes],
+          ["Repairs",row.repairs],
+          ["Created",formatTimestamp(row.created)],
+          ["Updated",formatTimestamp(row.updated)]
+      ];
+
+      el("modalGeneral").innerHTML=general.map(x=>
+          `<tr><td>${x[0]}</td><td>${norm(x[1])}</td></tr>`
+      ).join("");
+
+      const classification=[
+          ["Standards",row.standards],
+          ["Protocols",row.protocols],
+          ["Systems",row.systems],
+          ["Subsystems",row.subsystems],
+          ["Categories",row.categories],
+          ["Severities",row.severities]
+      ];
+
+      el("modalClassification").innerHTML=classification.map(x=>
+          `<tr><td>${x[0]}</td><td>${norm(x[1])}</td></tr>`
+      ).join("");
+
+      el("modalRelated").innerHTML=(row.related||"")
+          .split(",")
+          .filter(Boolean)
+          .map(v=>`<li>${v}</li>`)
+          .join("");
+
+      el("modalEvidence").innerHTML=(row.evidence||"")
+          .split(",")
+          .filter(Boolean)
+          .map(v=>`<li>${v}</li>`)
+          .join("");
+
+      el("dtcModal").classList.remove("hidden");
+    }
+    el("modalClose").addEventListener("click",()=>{
+     el("dtcModal").classList.add("hidden");
+    });
+
+    document.querySelector(".modal-backdrop").addEventListener("click",()=>{
+      el("dtcModal").classList.add("hidden");
+    });
+
+    window.addEventListener("keydown",(e)=>{
+      if(e.key==="Escape")
+          el("dtcModal").classList.add("hidden");
+    });
   </script>
 </body>
 </html>
