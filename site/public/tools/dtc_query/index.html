@@ -149,7 +149,7 @@
     }
     tbody td{border-bottom:1px solid rgba(88,110,117,.18); padding:10px 10px; vertical-align:top}
     tbody tr:hover{background:rgba(38,139,210,.06)}
-    .id{font-family:var(--mono); color:var(--cyan); font-weight:600; white-space:nowrap}
+    .dtc_code{font-family:var(--mono); color:var(--cyan); font-weight:600; white-space:nowrap}
     .muted{color:var(--muted)}
     .pager{margin-top:10px; display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap}
     .modal.hidden{
@@ -315,11 +315,18 @@
         <table>
           <thead>
             <tr>
-              <th style="width:110px">id</th>
+              <th>code</th>
               <th>definition</th>
-              <th>description</th>
-              <th style="width:180px">brand</th>
-              <th style="width:200px">ecu_model</th>
+              <th>vehicle manufacturer</th>
+              <th>vehicle model</th>
+              <th>vehicle year</th>
+              <th>vehicle version</th>
+              <th>engine code</th>
+              <th>engine fuel</th>
+              <th>power kw</th>
+              <th>ecu manufacturer</th>
+              <th>ecu model</th>
+              <th>ecu type</th>
             </tr>
           </thead>
           <tbody id="tbody">
@@ -482,10 +489,11 @@
     function renderRows(rows){
       const tb = el("tbody")
       tb.innerHTML = ""
+
       if (!rows.length){
         const tr = document.createElement("tr")
         const td = document.createElement("td")
-        td.colSpan = 5
+        td.colSpan = 15
         td.className = "muted"
         td.textContent = "No results."
         tr.appendChild(td)
@@ -495,29 +503,35 @@
 
       for (const r of rows){
         const tr = document.createElement("tr")
+
         tr.addEventListener("click", () => {
-          openDtcModal(r.id, r.ecu)
+          openDtcModal(r.code, r.ecu_model)
         })
-        const tdId = document.createElement("td")
-        tdId.className = "id"
-        tdId.textContent = norm(r.id)
-        tr.appendChild(tdId)
 
-        const tdDef = document.createElement("td")
-        tdDef.textContent = norm(r.definition)
-        tr.appendChild(tdDef)
+        const values = [
+          ["code", r.code],
+          ["definition", r.definition],
+          ["vehicle manufacturer", r.vehicle_manufacturer],
+          ["vehicle", r.vehicle_model],
+          ["year", r.vehicle_year],
+          ["version", r.vehicle_version],
+          ["engine", r.engine_code],
+          ["fuel", r.engine_fuel],
+          ["power (kW)", r.power_kw],
+          ["manufacturer", r.ecu_manufacturer],
+          ["ecu", r.ecu_model],
+          ["ecu type", r.ecu_type],
+        ]
 
-        const tdDesc = document.createElement("td")
-        tdDesc.textContent = norm(r.description)
-        tr.appendChild(tdDesc)
+        for (const [name, value] of values){
+          const td = document.createElement("td")
 
-        const tdB = document.createElement("td")
-        tdB.textContent = norm(r.brand)
-        tr.appendChild(tdB)
-
-        const tdU = document.createElement("td")
-        tdU.textContent = norm(r.ecu)
-        tr.appendChild(tdU)
+          if ( name === "code" ) {
+            td.className = "dtc_code"
+          }
+          td.textContent = norm(value)
+          tr.appendChild(td)
+        }
 
         tb.appendChild(tr)
       }
@@ -676,27 +690,54 @@
 
       const fromSql = `
         FROM ad_dtc d
-        INNER JOIN ad_ecu ecu ON ecu.id = d.ecu_id
-        LEFT JOIN ad_manufacturer m ON m.id = ecu.manufacturer_id
+        JOIN ad_ecu ecu
+          ON ecu.id = d.ecu_id
+        JOIN ad_manufacturer m
+          ON m.id = ecu.manufacturer_id
+        LEFT JOIN ad_vehicle_version_ecu vve
+          ON vve.ecu_id = ecu.id
+        LEFT JOIN ad_vehicle_version vv
+          ON vv.id = vve.vehicle_version_id
+        LEFT JOIN ad_vehicle v
+          ON v.id = vv.vehicle_id
+        LEFT JOIN ad_engine e
+          ON e.id = vv.engine_id
+        LEFT JOIN ad_manufacturer vm
+          ON vm.id = v.manufacturer_id
+      `
+
+      const rowsSql = `
+        SELECT DISTINCT
+          d.id,
+          d.code,
+          d.definition,
+          d.description,
+          d.mil,
+          e.code AS engine_code,
+          e.fuel AS engine_fuel,
+          vm.name AS vehicle_manufacturer,
+          v.model AS vehicle_model,
+          v.type AS vehicle_type,
+          vv.version AS vehicle_version,
+          vv.year AS vehicle_year,
+          vv.power_kw,
+          ecu.model AS ecu_model,
+          ecu.type AS ecu_type,
+          m.name AS ecu_manufacturer
+        ${fromSql}
+        ${whereSql}
+        ORDER BY
+          vm.name,
+          v.model,
+          vv.year,
+          vv.version
+        LIMIT ? OFFSET ?
       `
 
       const countSql = `
         SELECT COUNT(*) AS total
         ${fromSql}
         ${whereSql}
-      `
-
-      const rowsSql = `
-        SELECT
-          d.code AS id,
-          d.definition AS definition,
-          d.description AS description,
-          COALESCE(m.name, '') AS brand,
-          COALESCE(ecu.model, '') AS ecu
-        ${fromSql}
-        ${whereSql}
-        ORDER BY d.code, brand, ecu
-        LIMIT ? OFFSET ?
       `
 
       setStatus("Querying sqlite…")
